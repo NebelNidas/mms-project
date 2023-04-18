@@ -6,3 +6,7 @@ pluginManagement {
 	plugins {
 	}
 }
+
+rootProject.name = 'silence-remover'
+
+include 'silence-remover-core'
