@@ -4,9 +4,12 @@ plugins {
 }
 
 allprojects {
+	apply plugin: 'java'
+	apply plugin: 'checkstyle'
+
 	checkstyle {
-		configFile = project.file('checkstyle.xml')
-		toolVersion = project.checkstyle_version
+		configFile = rootProject.file('checkstyle.xml')
+		toolVersion = rootProject.checkstyle_version
 	}
 
 
