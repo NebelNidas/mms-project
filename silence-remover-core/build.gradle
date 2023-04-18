@@ -1,0 +1,9 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'checkstyle'
+}
+
+application {
+	mainClass = 'silenceremover.Main'
+}

@@ -3,8 +3,6 @@ pluginManagement {
 		gradlePluginPortal()
 		mavenCentral()
 	}
-	plugins {
-	}
 }
 
 rootProject.name = 'silence-remover'
