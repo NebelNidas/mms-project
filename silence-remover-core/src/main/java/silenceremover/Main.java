@@ -1,4 +1,4 @@
-package mms_project;
+package silenceremover;
 
 public class Main {
 	public static void main(String[] args) {
