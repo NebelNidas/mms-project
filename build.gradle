@@ -34,6 +34,7 @@ allprojects {
 	}
 
 	dependencies {
+		implementation "org.jetbrains:annotations:${jetbrains_annotations_version}"
 		implementation "org.slf4j:slf4j-api:${slf4j_version}"
 		runtimeOnly "org.tinylog:tinylog-impl:${tinylog_version}"
 		runtimeOnly "org.tinylog:slf4j-tinylog:${tinylog_version}"
