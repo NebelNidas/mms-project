@@ -5,3 +5,7 @@ plugins {
 application {
 	mainClass = 'silenceremover.Main'
 }
+
+jar {
+	processResources.exclude('tinylog-dev.properties')
+}
