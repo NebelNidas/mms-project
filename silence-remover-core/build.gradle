@@ -6,6 +6,12 @@ application {
 	mainClass = 'silenceremover.Main'
 }
 
+dependencies {
+	implementation "com.beust:jcommander:${jcommander_version}"
+	runtimeOnly "org.tinylog:tinylog-impl:${tinylog_version}"
+	runtimeOnly "org.tinylog:slf4j-tinylog:${tinylog_version}"
+}
+
 jar {
 	processResources.exclude('tinylog-dev.properties')
 }
