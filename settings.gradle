@@ -7,4 +7,6 @@ pluginManagement {
 
 rootProject.name = 'silence-remover'
 
+include 'job4j'
 include 'silence-remover-core'
+include 'silence-remover-cli'

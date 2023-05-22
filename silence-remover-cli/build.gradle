@@ -1,0 +1,18 @@
+plugins {
+	id 'application'
+}
+
+application {
+	mainClass = 'silenceremover.cli.Main'
+}
+
+dependencies {
+	api project(":silence-remover-core")
+	implementation "com.beust:jcommander:${jcommander_version}"
+	runtimeOnly "org.tinylog:tinylog-impl:${tinylog_version}"
+	runtimeOnly "org.tinylog:slf4j-tinylog:${tinylog_version}"
+}
+
+jar {
+	processResources.exclude('tinylog-dev.properties')
+}
