@@ -85,14 +85,14 @@ public class ProjectConfig {
 
 	@Override
 	public String toString() {
-		return "{" +
-			" inputFile='" + inputFile + "'" +
-			", outputFile='" + outputFile + "'" +
-			", minSegmentMillis='" + minSegmentMillis + "'" +
-			", maxVolume='" + maxVolume + "'" +
-			", targetSpeed='" + targetSpeed + "'" +
-			", audioOnly='" + audioOnly + "'" +
-			", maxThreads='" + maxThreads + "'" +
-			"}";
+		return "{"
+			+ " inputFile='" + inputFile + "'"
+			+ ", outputFile='" + outputFile + "'"
+			+ ", minSegmentMillis='" + minSegmentMillis + "'"
+			+ ", maxVolume='" + maxVolume + "'"
+			+ ", targetSpeed='" + targetSpeed + "'"
+			+ ", audioOnly='" + audioOnly + "'"
+			+ ", maxThreads='" + maxThreads + "'"
+			+ "}";
 	}
 }

@@ -1,0 +1,5 @@
+tasks.withType(Checkstyle) {
+	// Job4j will be moved into a separate repository soon,
+	// which will adhere to different styling guidelines.
+    exclude '**/job4j'
+}
