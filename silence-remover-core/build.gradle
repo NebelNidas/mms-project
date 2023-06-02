@@ -1,3 +1,4 @@
 dependencies {
 	implementation "org.slf4j:slf4j-api:${project.slf4j_version}"
+	implementation "net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_version}"
 }
