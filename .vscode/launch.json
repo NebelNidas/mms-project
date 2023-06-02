@@ -1,0 +1,17 @@
+{
+	"configurations": [
+		{
+			"type": "java",
+			"name": "Launch CLI",
+			"request": "launch",
+			"mainClass": "silenceremover.cli.Main",
+			"args": [
+				"process",
+				"--input-file",
+				"input.mp4",
+				"--output-file",
+				"output.mp4"
+			]
+		}
+	]
+}
