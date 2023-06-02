@@ -1,4 +1,5 @@
 dependencies {
-	implementation "org.slf4j:slf4j-api:${project.slf4j_version}"
+	api "org.slf4j:slf4j-api:${project.slf4j_version}"
+	api "org.jetbrains:annotations:${jetbrains_annotations_version}"
 	implementation "net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_version}"
 }
