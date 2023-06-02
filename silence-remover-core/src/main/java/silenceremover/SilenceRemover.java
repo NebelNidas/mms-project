@@ -12,6 +12,6 @@ public class SilenceRemover {
 
 	public void process(ProjectConfig config, DoubleConsumer processReceiver) {
 		// TODO
-		System.out.println(config.toString());
+		LOGGER.info(config.toString());
 	}
 }
