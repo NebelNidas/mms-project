@@ -74,7 +74,7 @@ public abstract class Job<T> implements Runnable {
 	 * then this job's overall progress is automatically calculated
 	 * from the individual subjobs' progresses.
 	 */
-	protected abstract T execute(DoubleConsumer progressReceiver);
+	protected abstract T execute(DoubleConsumer progressReceiver) throws Exception;
 
 
 	//======================================================================================
@@ -261,7 +261,7 @@ public abstract class Job<T> implements Runnable {
 		}
 	}
 
-	private void onOwnProgressChange(double progress) {
+	protected void onOwnProgressChange(double progress) {
 		validateProgress(progress);
 
 		if (progress < 1f - Util.floatError && Math.abs(progress - ownProgress) < 0.005) {
