@@ -3,6 +3,8 @@ package silenceremover.jobs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -96,7 +98,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 		onOwnProgressChange(progress / audibleIntervals.size() / 2);
 	}
 
-	private void mergeSegments() {
+	private void mergeSegments() throws IOException {
 		splitFiles.sort(Comparator.naturalOrder());
 
 		// try {
@@ -119,6 +121,8 @@ public class ProcessSegmentsJob extends Job<Path> {
 		// 	throw new RuntimeException(e);
 		// }
 
+
+
 		List<String> command = new ArrayList<>();
 		command.add("ffmpeg");
 		command.add("-f");
@@ -127,19 +131,22 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("0");
 		command.add("-i");
 
-		StringBuilder sb = new StringBuilder("concat:");
+		List<String> lines = new ArrayList<>(splitFiles.size());
 
 		for (Path path : splitFiles) {
-			sb.append(path.toString() + (splitFiles.indexOf(path) == splitFiles.size() - 1 ? "" : "|"));
+			lines.add("file '" + path.toAbsolutePath().toString() + "'");
 		}
 
-		command.add(sb.toString());
+		Path txtFile = tempDir.resolve("segments.txt");
+		Files.write(txtFile, lines, StandardCharsets.UTF_8);
+
+		command.add(txtFile.toString());
 		command.add("-c");
 		command.add("copy");
 		command.add("-y");
 		command.add("-loglevel");
 		command.add("verbose");
-		command.add(config.outputFile.toString());
+		command.add(config.outputFile.toAbsolutePath().toString());
 
 		try {
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -155,10 +162,10 @@ public class ProcessSegmentsJob extends Job<Path> {
 				SilenceRemover.LOGGER.info(line.toString());
 
 				if (line.contains("Auto-inserting")) {
-					onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
+					double percentage = (double) fileIndex / audibleIntervals.size() / 2;
+					onOwnProgressChange(percentage);
+					fileIndex++;
 				}
-
-				fileIndex++;
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
