@@ -31,14 +31,14 @@ public class ProcessSegmentsJob extends Job<Path> {
 	private final List<Interval> intervals;
 	private final AtomicInteger splitsCompleted = new AtomicInteger();
 	private List<Interval> audibleIntervals;
-	private Queue<List<Interval>> intervalGroups = new ConcurrentLinkedQueue<>();
+	private Queue<List<Interval>> audibleIntervalGroups = new ConcurrentLinkedQueue<>();
 	private List<Path> splitFiles = new ArrayList<>();
 
 	public ProcessSegmentsJob(ProjectConfig config, List<Interval> intervals) {
 		super(JobCategories.PROCESS_SEGMENTS);
 
 		this.config = config;
-		this.tempDir = config.outputFile.resolve("silence-remover-temp");
+		this.tempDir = config.outputFile.getParent().resolve("silence-remover-temp");
 		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / threadsPerFfmpegInstance));
 		this.intervals = intervals;
 	}
@@ -54,7 +54,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 		int id = 0;
 
-		for (List<Interval> group : intervalGroups) {
+		for (List<Interval> group : audibleIntervalGroups) {
 			threadPool.submit(new SplitTask(id, config, group, this::getTempFileForInterval,
 					this::onSplitTaskProgressChange, this::onSplitTaskCompleted)::call);
 			id += intervalsPerFfmpegInstance;
@@ -72,7 +72,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 			if ((i != 0 && i % intervalsPerFfmpegInstance == 0)
 					|| i == audibleIntervals.size() - 1) {
-				intervalGroups.add(intervalGroup);
+				audibleIntervalGroups.add(intervalGroup);
 				intervalGroup = new ArrayList<>(intervalsPerFfmpegInstance);
 			}
 		}
@@ -127,7 +127,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("-safe");
 		command.add("0");
 		command.add("-i");
-		command.add(concat_file.toString());
+		// command.add(concat_file.toString());
 		command.add("-c");
 		command.add("copy");
 		command.add("-y");
@@ -135,24 +135,32 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("verbose");
 		command.add(config.outputFile.toString());
 
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		processBuilder.redirectErrorStream(true);
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			processBuilder.redirectErrorStream(true);
 
-		Process process = processBuilder.start();
-		BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			Process process = processBuilder.start();
+			BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-		int fileIndex = 1;
-		String line;
+			int fileIndex = 1;
+			String line;
 
-		while ((line = stdOut.readLine()) != null) {
-			if (line.contains("Auto-inserting")) {
-				onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
+			while ((line = stdOut.readLine()) != null) {
+				if (line.contains("Auto-inserting")) {
+					onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
+				}
+
+				fileIndex++;
 			}
-
-			fileIndex++;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
-		cleanUp();
+		try {
+			cleanUp();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void cleanUp() throws IOException {

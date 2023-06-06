@@ -19,7 +19,7 @@ import silenceremover.jobs.ProcessSegmentsJob;
 public class SilenceRemover {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Silence Remover");
 	private final ProjectConfig config;
-	private List<Interval> intervals = new ArrayList<>();
+	private final List<Interval> intervals = new ArrayList<>();
 
 	public SilenceRemover(ProjectConfig config) {
 		this.config = config;
