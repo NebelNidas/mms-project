@@ -1,6 +1,8 @@
 package silenceremover;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,28 +13,26 @@ import java.util.function.Function;
 
 import silenceremover.config.ProjectConfig;
 
-public class SplitTask implements Callable<List<Path>> {
+public class SplitThread implements Callable<List<Path>> {
 	private final int id;
 	private final ProjectConfig config;
 	private final List<Interval> intervals;
 	private final DoubleConsumer progressReceiver;
-	private final Consumer<List<Path>> onFinishListener;
 	private final Function<Interval, Path> tempFileGenerator;
 
-	public SplitTask(int id, ProjectConfig config, List<Interval> intervals, Function<Interval, Path> tempFileGenerator,
-			DoubleConsumer progressReceiver, Consumer<List<Path>> onFinishListener) {
+	public SplitThread(int id, ProjectConfig config, List<Interval> intervals,
+			Function<Interval, Path> tempFileGenerator,	DoubleConsumer progressReceiver) {
 		this.id = id;
 		this.config = config;
 		this.tempFileGenerator = tempFileGenerator;
 		this.intervals = intervals;
 		this.progressReceiver = progressReceiver;
-		this.onFinishListener = onFinishListener;
 	}
 
 	@Override
 	public List<Path> call() {
 		boolean applyFilter = true;
-		double minimumIntervalDuration = config.minSegmentMillis / 1000;
+		double minimumIntervalDuration = config.minSegmentLength;
 		List<Path> outputPaths = new ArrayList<>(intervals.size());
 
 		for (Interval interval : intervals) {
@@ -46,11 +46,17 @@ public class SplitTask implements Callable<List<Path>> {
 
 		try {
 			process = processBuilder.start();
+
+			BufferedReader stream = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+
+			while ((line = stream.readLine()) != null) {
+				SilenceRemover.LOGGER.info(line.toString());
+			}
+
 			int exitCode = process.waitFor();
 
-			if (exitCode == 0) {
-				onFinishListener.accept(outputPaths);
-			} else {
+			if (exitCode != 0) {
 				throw new RuntimeException("Error while splitting the video");
 			}
 		} catch (IOException | InterruptedException e) {

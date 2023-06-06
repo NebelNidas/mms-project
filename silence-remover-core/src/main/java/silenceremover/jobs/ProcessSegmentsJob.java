@@ -8,18 +8,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.DoubleConsumer;
 
 import org.apache.commons.io.FileUtils;
 
 import job4j.Job;
-
 import silenceremover.Interval;
-import silenceremover.SplitTask;
+import silenceremover.SilenceRemover;
+import silenceremover.SplitThread;
 import silenceremover.config.ProjectConfig;
 
 public class ProcessSegmentsJob extends Job<Path> {
@@ -38,27 +41,34 @@ public class ProcessSegmentsJob extends Job<Path> {
 		super(JobCategories.PROCESS_SEGMENTS);
 
 		this.config = config;
-		this.tempDir = config.outputFile.getParent().resolve("silence-remover-temp");
+		this.tempDir = config.outputFile.toAbsolutePath().getParent().resolve("silence-remover-temp");
+		this.tempDir.toFile().mkdirs();
 		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / threadsPerFfmpegInstance));
 		this.intervals = intervals;
 	}
 
 	@Override
-	protected Path execute(DoubleConsumer progressReceiver) {
+	protected Path execute(DoubleConsumer progressReceiver) throws Exception {
 		process();
 		return config.outputFile;
 	}
 
-	public void process() {
+	public void process() throws Exception {
 		collectIntervalGroups();
 
 		int id = 0;
+		List<Future<List<Path>>> futures = new ArrayList<>();
 
 		for (List<Interval> group : audibleIntervalGroups) {
-			threadPool.submit(new SplitTask(id, config, group, this::getTempFileForInterval,
-					this::onSplitTaskProgressChange, this::onSplitTaskCompleted)::call);
+			futures.add(threadPool.submit(new SplitThread(id, config, group, this::getTempFileForInterval, this::onSplitTaskProgressChange)::call));
 			id += intervalsPerFfmpegInstance;
 		}
+
+		for (var future : futures) {
+			splitFiles.addAll(future.get());
+		}
+
+		mergeSegments();
 	}
 
 	private void collectIntervalGroups() {
@@ -84,17 +94,6 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 	private void onSplitTaskProgressChange(double progress) {
 		onOwnProgressChange(progress / audibleIntervals.size() / 2);
-	}
-
-	private void onSplitTaskCompleted(List<Path> splitFiles) {
-		synchronized (splitFiles) {
-			this.splitFiles.addAll(splitFiles);
-			splitsCompleted.incrementAndGet();
-		}
-
-		if (splitsCompleted.get() == audibleIntervals.size()) {
-			mergeSegments();
-		}
 	}
 
 	private void mergeSegments() {
@@ -127,7 +126,14 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("-safe");
 		command.add("0");
 		command.add("-i");
-		// command.add(concat_file.toString());
+
+		StringBuilder sb = new StringBuilder("concat:");
+
+		for (Path path : splitFiles) {
+			sb.append(path.toString() + (splitFiles.indexOf(path) == splitFiles.size() - 1 ? "" : "|"));
+		}
+
+		command.add(sb.toString());
 		command.add("-c");
 		command.add("copy");
 		command.add("-y");
@@ -146,6 +152,8 @@ public class ProcessSegmentsJob extends Job<Path> {
 			String line;
 
 			while ((line = stdOut.readLine()) != null) {
+				SilenceRemover.LOGGER.info(line.toString());
+
 				if (line.contains("Auto-inserting")) {
 					onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
 				}

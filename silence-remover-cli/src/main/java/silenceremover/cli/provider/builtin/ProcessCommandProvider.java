@@ -25,7 +25,17 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.OUTPUT_FILE}, required = true)
 		Path outputFile;
 
-		// TODO: Add missing parameters (see BuiltinCliParameters.java)
+		@Parameter(names = {BuiltinCliParameters.MIN_SEGMENT_LENGTH})
+		double minSegmentLength = 0.2;
+
+		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
+		double maxVolume = 0.3;
+
+		@Parameter(names = {BuiltinCliParameters.AUDIO_ONLY})
+		boolean audioOnly = false;
+
+		@Parameter(names = {BuiltinCliParameters.MAX_THREADS})
+		int maxThreads = Runtime.getRuntime().availableProcessors() / 2;
 	}
 
 	@Override
@@ -43,7 +53,10 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		validateArgs();
 
 		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile)
-				// TODO: Add values from not yet implemented parameters
+				.minSegmentLength(command.minSegmentLength)
+				.maxVolume(command.maxVolume)
+				.audioOnly(command.audioOnly)
+				.maxThreads(command.maxThreads)
 				.build();
 		SilenceRemover silenceRemover = new SilenceRemover(config);
 		AtomicInteger lastPrintedPercentage = new AtomicInteger(-1);
