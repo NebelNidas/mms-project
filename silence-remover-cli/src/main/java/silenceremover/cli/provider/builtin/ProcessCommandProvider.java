@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
+import job4j.Job;
+
 import silenceremover.SilenceRemover;
 import silenceremover.cli.SilenceRemoverCli;
 import silenceremover.cli.provider.CliCommandProvider;
@@ -23,7 +25,17 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.OUTPUT_FILE}, required = true)
 		Path outputFile;
 
-		// TODO: Add missing parameters (see BuiltinCliParameters.java)
+		@Parameter(names = {BuiltinCliParameters.MIN_SEGMENT_LENGTH})
+		double minSegmentLength = 0.2;
+
+		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
+		double maxVolume = 0.3;
+
+		@Parameter(names = {BuiltinCliParameters.AUDIO_ONLY})
+		boolean audioOnly = false;
+
+		@Parameter(names = {BuiltinCliParameters.MAX_THREADS})
+		int maxThreads = Runtime.getRuntime().availableProcessors() / 2;
 	}
 
 	@Override
@@ -40,13 +52,17 @@ public class ProcessCommandProvider implements CliCommandProvider {
 	public void processArgs() {
 		validateArgs();
 
-		SilenceRemover silenceRemover = new SilenceRemover();
 		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile)
-				// TODO: Add values from not yet implemented parameters
+				.minSegmentLength(command.minSegmentLength)
+				.maxVolume(command.maxVolume)
+				.audioOnly(command.audioOnly)
+				.maxThreads(command.maxThreads)
 				.build();
+		SilenceRemover silenceRemover = new SilenceRemover(config);
 		AtomicInteger lastPrintedPercentage = new AtomicInteger(-1);
 
-		silenceRemover.process(config, (progress) -> {
+		Job<?> job = silenceRemover.process();
+		job.addProgressListener((progress) -> {
 			int percentage = (int) (progress * 100);
 
 			if (percentage != lastPrintedPercentage.get() && percentage % 10 == 0) {
@@ -54,6 +70,7 @@ public class ProcessCommandProvider implements CliCommandProvider {
 				lastPrintedPercentage.set(percentage);
 			}
 		});
+		job.runAndAwait();
 		SilenceRemoverCli.LOGGER.info("Done!");
 	}
 

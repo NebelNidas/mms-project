@@ -1,3 +1,4 @@
 dependencies {
 	implementation "net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_version}"
+	implementation project(':job4j')
 }

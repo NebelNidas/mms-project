@@ -6,9 +6,8 @@ public class ProjectConfig {
 	public static class Builder {
 		protected final Path inputFile;
 		protected final Path outputFile;
-		protected int minSegmentMillis;
-		protected int maxVolume;
-		protected float targetSpeed;
+		protected double minSegmentMillis;
+		protected double maxVolume;
 		protected boolean audioOnly;
 		protected int maxThreads;
 
@@ -17,18 +16,13 @@ public class ProjectConfig {
 			this.outputFile = outputFile;
 		}
 
-		public Builder minSegmentMillis(int minSegmentMillis) {
+		public Builder minSegmentLength(double minSegmentMillis) {
 			this.minSegmentMillis = minSegmentMillis;
 			return this;
 		}
 
-		public Builder maxVolume(int maxVolume) {
+		public Builder maxVolume(double maxVolume) {
 			this.maxVolume = maxVolume;
-			return this;
-		}
-
-		public Builder targetSpeed(float targetSpeed) {
-			this.targetSpeed = targetSpeed;
 			return this;
 		}
 
@@ -48,7 +42,6 @@ public class ProjectConfig {
 					outputFile,
 					minSegmentMillis,
 					maxVolume,
-					targetSpeed,
 					audioOnly,
 					maxThreads);
 		}
@@ -60,25 +53,22 @@ public class ProjectConfig {
 
 	public final Path inputFile;
 	public final Path outputFile;
-	public final int minSegmentMillis;
-	public final int maxVolume;
-	public final float targetSpeed;
+	public final double minSegmentLength;
+	public final double maxVolume;
 	public final boolean audioOnly;
 	public final int maxThreads;
 
 	private ProjectConfig(
 			Path inputFile,
 			Path outputFile,
-			int minSegmentMillis,
-			int maxVolume,
-			float targetSpeed,
+			double minSegmentLength,
+			double maxVolume,
 			boolean audioOnly,
 			int maxThreads) {
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
-		this.minSegmentMillis = minSegmentMillis;
+		this.minSegmentLength = minSegmentLength;
 		this.maxVolume = maxVolume;
-		this.targetSpeed = targetSpeed;
 		this.audioOnly = audioOnly;
 		this.maxThreads = maxThreads;
 	}
@@ -88,9 +78,8 @@ public class ProjectConfig {
 		return "{"
 			+ " inputFile='" + inputFile + "'"
 			+ ", outputFile='" + outputFile + "'"
-			+ ", minSegmentMillis='" + minSegmentMillis + "'"
+			+ ", minSegmentLength='" + minSegmentLength + "'"
 			+ ", maxVolume='" + maxVolume + "'"
-			+ ", targetSpeed='" + targetSpeed + "'"
 			+ ", audioOnly='" + audioOnly + "'"
 			+ ", maxThreads='" + maxThreads + "'"
 			+ "}";
