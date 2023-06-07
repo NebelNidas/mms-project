@@ -10,18 +10,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.DoubleConsumer;
 
 import org.apache.commons.io.FileUtils;
 
 import job4j.Job;
+
 import silenceremover.Interval;
 import silenceremover.SilenceRemover;
 import silenceremover.SplitThread;
@@ -66,7 +65,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 			id += intervalsPerFfmpegInstance;
 		}
 
-		for (var future : futures) {
+		for (Future<List<Path>> future : futures) {
 			splitFiles.addAll(future.get());
 		}
 
@@ -120,8 +119,6 @@ public class ProcessSegmentsJob extends Job<Path> {
 		// } catch (Throwable e) {
 		// 	throw new RuntimeException(e);
 		// }
-
-
 
 		List<String> command = new ArrayList<>();
 		command.add("ffmpeg");

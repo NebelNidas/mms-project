@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 
@@ -21,7 +20,7 @@ public class SplitThread implements Callable<List<Path>> {
 	private final Function<Interval, Path> tempFileGenerator;
 
 	public SplitThread(int id, ProjectConfig config, List<Interval> intervals,
-			Function<Interval, Path> tempFileGenerator,	DoubleConsumer progressReceiver) {
+			Function<Interval, Path> tempFileGenerator, DoubleConsumer progressReceiver) {
 		this.id = id;
 		this.config = config;
 		this.tempFileGenerator = tempFileGenerator;
