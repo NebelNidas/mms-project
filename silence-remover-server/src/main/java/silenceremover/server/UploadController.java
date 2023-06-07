@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import silenceremover.SilenceRemover;
@@ -73,6 +70,14 @@ public class UploadController {
 		return ResponseEntity.ok(String.valueOf(timestamp));
 	}
 
+	@DeleteMapping("/job")
+	public ResponseEntity<String> handleDeleteUpload(@RequestParam("identifier") String identifier) {
+		if (progressService.existsJob(identifier)) {
+			progressService.getJob(identifier).cancel(true);
+		}
+		return ResponseEntity.ok().body("ok");
+	}
+
 	private SseEmitter addListeners(Job<File> job, String identifier) {
 		SseEmitter emitter = new SseEmitter(1000L * 60 * 60 * 60);
 		AtomicInteger lastSentProgress = new AtomicInteger(-1);
@@ -89,7 +94,7 @@ public class UploadController {
 					}
 				}
 			} catch (IOException e) {
-				// emitter.completeWithError(e);
+				emitter.completeWithError(e);
 			}
 		});
 		job.addCompletionListener((result, error) -> {
@@ -101,10 +106,10 @@ public class UploadController {
 					progressService.removeJob(identifier);
 					resultService.add(identifier, f.getAbsolutePath());
 				} catch (IOException e) {
-					//emitter.completeWithError(e);
+					emitter.completeWithError(e);
 				}
 			} else {
-				// error.ifPresent(emitter::completeWithError);
+				error.ifPresent(emitter::completeWithError);
 			}
 		});
 		return emitter;
@@ -151,5 +156,10 @@ public class UploadController {
 			.contentType(MediaType.parseMediaType("application/octet-stream"))
 			.contentLength(file.length())
 			.body(resource);
+	}
+
+	@GetMapping("/result/exists")
+	public boolean handleGetResultExists(@RequestParam("identifier") String identifier) {
+		return resultService.exists(identifier);
 	}
 }
