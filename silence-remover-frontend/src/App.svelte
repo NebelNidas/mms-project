@@ -3,7 +3,9 @@
 	import ConfigurationForm from './components/ConfigurationForm.svelte';
 	import LoadingAnimation from './components/LoadingAnimation.svelte';
 	import ResultView from './components/ResultView.svelte';
-	import ErrorModal from "./components/ErrorModal.svelte";
+	import ErrorModal from './components/ErrorModal.svelte';
+	import Header from './components/Header.svelte';
+	import Navigation from './components/Navigation.svelte';
 
 	const API_URL = process.env.API_URL;
 
@@ -36,7 +38,7 @@
 		formData.append('minSegmentLength', selectedConfig.minSegmentLength);
 		formData.append('maxVolume', selectedConfig.maxVolume);
 		formData.append('targetSpeed', selectedConfig.targetSpeed);
-		formData.append('audioOnly', selectedConfig.audioOnly);
+		formData.append('silenceTimeThreshold', selectedConfig.silenceTimeThreshold);
 
 		try {
 			const response = await fetch(`${API_URL}/upload`, {
@@ -63,21 +65,20 @@
 	}
 </style>
 
+<Header />
 <main>
-	<header>
-		<h1>Silence Remover</h1>
-	</header>
-
 	{#if isLoading}
 		<LoadingAnimation />
 	{:else if downloadLink}
 		<ResultView link={downloadLink} />
 	{:else}
 		<FilePicker on:fileSelected={(e) => selectedFile = e.detail} />
-		<ConfigurationForm on:configSubmitted={handleConfigSubmitted} disabled={selectedFile === undefined} />
+		<ConfigurationForm on:configSubmitted={handleConfigSubmitted} submitDisabled={selectedFile === undefined} />
 	{/if}
 
 	{#if error}
-		<ErrorModal message={error} />
+		<ErrorModal bind:message={error} />
 	{/if}
 </main>
+
+<Navigation />

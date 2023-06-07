@@ -9,11 +9,14 @@
 		100% { transform: rotate(360deg); }
 	}
 	.spinner {
-		animation: spin 1s ease-in-out infinite;
+		animation: spin 1.5s ease-in-out infinite;
+	}
+	p {
+		font-size: 14px;
 	}
 </style>
 
 <svg class="spinner" width={size} height={size} viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-	<circle class="path" cx="25" cy="25" r="20" fill="none" stroke={color} stroke-width="5" stroke-dasharray="10" />
+	<circle class="path" cx="25" cy="25" r="20" fill="none" stroke={color} stroke-width="10" stroke-dasharray="7" />
 </svg>
-<span>Loading...</span>
+<p>Your video is getting stripped of its silence. Don't reload this page.</p>
