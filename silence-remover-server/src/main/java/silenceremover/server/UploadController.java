@@ -44,16 +44,16 @@ public class UploadController {
 													@RequestParam("minSegmentLength") float minSegmentLength,
 													@RequestParam("maxVolume") float maxVolume,
 													@RequestParam("silenceTimeThreshold") float silenceTimeThreshold,
-													@RequestParam("identifier") String identifier) throws IOException {
-		if (identifier.length() < 20) {
+													@RequestParam("identifier") String id) throws IOException {
+		if (id.length() < 20) {
 			return ResponseEntity.badRequest().body("Invalid params!");
 		}
 
 		long timestamp = Instant.now().getEpochSecond();
-		String id = identifier + timestamp;
+		String identifier = id + timestamp;
 
-		Path inPath = saveFile(file, id);
-		Path outPath = Paths.get(FILE_STORAGE_PATH + File.separator + OUT_PATH + File.separator + identifier);
+		Path inPath = saveFile(file, identifier);
+		Path outPath = Paths.get(FILE_STORAGE_PATH + File.separator + OUT_PATH + File.separator + identifier + ".mp4");
 
 		ProjectConfig config = ProjectConfig.builder(inPath, outPath)
 			// todo add silenceTimeThreshold
@@ -66,7 +66,7 @@ public class UploadController {
 		addListeners(job, identifier);
 
 		job.run();
-		progressService.addJob(id, job.asFuture());
+		progressService.addJob(identifier, job.asFuture());
 		return ResponseEntity.ok(String.valueOf(timestamp));
 	}
 
@@ -138,7 +138,7 @@ public class UploadController {
 
 	private Path saveFile(MultipartFile file, String identifier) throws IOException {
 		byte[] bytes = file.getBytes();
-		Path path = Paths.get(FILE_STORAGE_PATH + File.separator + IN_PATH + File.separator + identifier);
+		Path path = Paths.get(FILE_STORAGE_PATH + File.separator + IN_PATH + File.separator + identifier + ".mp4");
 		Files.write(path, bytes);
 		return path;
 	}
