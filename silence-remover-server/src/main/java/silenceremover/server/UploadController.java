@@ -22,6 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 public class UploadController {
@@ -61,43 +64,71 @@ public class UploadController {
 			.maxVolume(maxVolume)
 			.build();
 
-		SseEmitter emitter = new SseEmitter();
 
 		Job<File> job = new SilenceRemover(config).process();
+		addListeners(job, identifier);
+
+		job.run();
+		progressService.addJob(id, job.asFuture());
+		return ResponseEntity.ok(String.valueOf(timestamp));
+	}
+
+	private SseEmitter addListeners(Job<File> job, String identifier) {
+		SseEmitter emitter = new SseEmitter(1000L * 60 * 60 * 60);
+		AtomicInteger lastSentProgress = new AtomicInteger(-1);
 		job.addProgressListener(progress -> {
 			try {
-				emitter.send(progress * 100);
+				int percentage = (int) (progress * 100);
+				if (percentage > lastSentProgress.get()) {
+					try {
+						emitter.send(percentage);
+						progressService.setLastProgress(identifier, percentage);
+					} catch (IllegalStateException e) {
+						// not beautiful, but currently the best workaround
+						lastSentProgress.set(1000);
+					}
+				}
 			} catch (IOException e) {
-				emitter.completeWithError(e);
+				// emitter.completeWithError(e);
 			}
 		});
 		job.addCompletionListener((result, error) -> {
 			if (result.isPresent()) {
 				File f = result.get();
 				try {
-					emitter.send("COMPLETE");
+					emitter.send("COMPLETED");
 					emitter.complete();
-					progressService.remove(id);
-					resultService.add(id, f.getAbsolutePath());
+					progressService.removeJob(identifier);
+					resultService.add(identifier, f.getAbsolutePath());
 				} catch (IOException e) {
-					emitter.completeWithError(e);
+					//emitter.completeWithError(e);
 				}
 			} else {
-				error.ifPresent(emitter::completeWithError);
+				// error.ifPresent(emitter::completeWithError);
 			}
 		});
+		return emitter;
+	}
 
-		progressService.add(id, emitter);
-		job.run();
-		return ResponseEntity.ok(String.valueOf(timestamp));
+	@GetMapping("/progress/exists")
+	public boolean handleGetProgressExists(@RequestParam("identifier") String identifier) {
+		return progressService.existsJob(identifier) && !progressService.getJob(identifier).isDone() && !progressService.getJob(identifier).isCancelled();
 	}
 
 	@GetMapping("/progress")
 	public SseEmitter handleGetProgressSse(@RequestParam("identifier") String identifier) {
-		if (!progressService.exists(identifier)) {
+		if (!progressService.existsJob(identifier)) {
 			throw new IllegalArgumentException();
 		}
-		return progressService.get(identifier);
+		return addListeners(progressService.getJob(identifier).getUnderlyingJob(), identifier);
+	}
+
+	@GetMapping("/progress/update")
+	public int handleGetProgressUpdate(@RequestParam("identifier") String identifier) {
+		if (!progressService.existsLastProgress(identifier)) {
+			return -1;
+		}
+		return progressService.getLastProgress(identifier);
 	}
 
 	private Path saveFile(MultipartFile file, String identifier) throws IOException {
