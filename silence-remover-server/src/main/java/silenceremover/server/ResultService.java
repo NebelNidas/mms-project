@@ -1,8 +1,8 @@
 package silenceremover.server;
 
-import org.springframework.stereotype.Service;
-
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Service;
 
 @Service
 public class ResultService {

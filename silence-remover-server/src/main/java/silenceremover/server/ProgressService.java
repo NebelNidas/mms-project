@@ -1,12 +1,11 @@
 package silenceremover.server;
 
-import job4j.Job;
-import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
+
+import org.springframework.stereotype.Service;
+
+import job4j.Job;
 
 @Service
 public class ProgressService {

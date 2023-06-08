@@ -1,16 +1,5 @@
 package silenceremover.server;
 
-import job4j.Job;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import silenceremover.SilenceRemover;
-import silenceremover.config.ProjectConfig;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,9 +8,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import job4j.Job;
+
+import silenceremover.SilenceRemover;
+import silenceremover.config.ProjectConfig;
 
 @RestController
 public class UploadController {
@@ -56,11 +60,10 @@ public class UploadController {
 		Path outPath = Paths.get(FILE_STORAGE_PATH + File.separator + OUT_PATH + File.separator + identifier + ".mp4");
 
 		ProjectConfig config = ProjectConfig.builder(inPath, outPath)
-			// todo add silenceTimeThreshold
-			.minSegmentLength(minSegmentLength)
-			.maxVolume(maxVolume)
-			.build();
-
+				// todo add silenceTimeThreshold
+				.minSegmentLength(minSegmentLength)
+				.maxVolume(maxVolume)
+				.build();
 
 		Job<File> job = new SilenceRemover(config).process();
 		addListeners(job, identifier);
@@ -75,6 +78,7 @@ public class UploadController {
 		if (progressService.existsJob(identifier)) {
 			progressService.getJob(identifier).cancel(true);
 		}
+
 		return ResponseEntity.ok().body("ok");
 	}
 
@@ -84,6 +88,7 @@ public class UploadController {
 		job.addProgressListener(progress -> {
 			try {
 				int percentage = (int) (progress * 100);
+
 				if (percentage > lastSentProgress.get()) {
 					try {
 						emitter.send(percentage);
@@ -100,6 +105,7 @@ public class UploadController {
 		job.addCompletionListener((result, error) -> {
 			if (result.isPresent()) {
 				File f = result.get();
+
 				try {
 					emitter.send("COMPLETED");
 					emitter.complete();
@@ -125,6 +131,7 @@ public class UploadController {
 		if (!progressService.existsJob(identifier)) {
 			throw new IllegalArgumentException();
 		}
+
 		return addListeners(progressService.getJob(identifier).getUnderlyingJob(), identifier);
 	}
 
@@ -133,6 +140,7 @@ public class UploadController {
 		if (!progressService.existsLastProgress(identifier)) {
 			return -1;
 		}
+
 		return progressService.getLastProgress(identifier);
 	}
 
@@ -148,8 +156,9 @@ public class UploadController {
 		if (!resultService.exists(identifier)) {
 			return ResponseEntity.badRequest().body(null);
 		}
+
 		File file = new File(resultService.get(identifier));
-		InputStreamResource	resource = new InputStreamResource(new FileInputStream(file));
+		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 
 		return ResponseEntity.ok()
 			.header("Content-Disposition", "attachment;filename=" + identifier)
