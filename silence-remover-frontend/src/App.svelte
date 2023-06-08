@@ -89,11 +89,16 @@
 				handleResultReady();
 			} else {
 				progress = parseInt(event.data);
+				if (progress === 100) {
+					eventSource.close();
+					handleResultReady();
+				}
 			}
 		};
 
 		eventSource.onerror = e => {
 			error = "Progress subscription error!";
+			isLoading = false;
 			eventSource.close();
 		};
 	}

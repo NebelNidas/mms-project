@@ -17,6 +17,10 @@
 	p {
 		font-size: 14px;
 	}
+
+	button {
+		margin-top: 1rem;
+	}
 </style>
 
 <svg class="spinner" width={size} height={size} viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +29,7 @@
 
 {#if progress}
 	<p>Your video is getting stripped of its silence. Get yourself a coffee.</p>
-	<p>Progress: {progress}%</p>
+	<progress value={progress} max="100"> {progress}% </progress>
 {:else}
 	<p>Your video is getting uploaded</p>
 {/if}

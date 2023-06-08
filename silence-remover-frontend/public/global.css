@@ -10,7 +10,14 @@ button {
 	border-radius: 8px;
 	border: 1px solid #5f27cd;
 }
-
+a {
+	color: #5f27cd;
+	text-decoration: none;
+	font-weight: 800;
+}
+a:hover {
+	text-decoration: underline;
+}
 /* GLOW ANIMATION */
 .glow {
 	outline: none;

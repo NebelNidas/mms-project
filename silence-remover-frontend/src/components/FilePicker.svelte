@@ -43,7 +43,6 @@
 	};
 
 	const humanDuration = (seconds) => {
-		console.log(seconds)
 		if (typeof seconds !== 'number' || isNaN(seconds)) {
 			return '?'
 		}
