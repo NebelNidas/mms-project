@@ -1,0 +1,3 @@
+sr_files/*
+!sr_files/in/.gitkeep
+!sr_files/out/.gitkeep
