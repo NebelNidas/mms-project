@@ -58,6 +58,7 @@ public class UploadController {
 
 		Path inPath = saveFile(file, identifier);
 		Path outPath = Paths.get(FILE_STORAGE_PATH + File.separator + OUT_PATH + File.separator + identifier + ".mp4");
+		Files.createDirectories(outPath);
 
 		ProjectConfig config = ProjectConfig.builder(inPath, outPath)
 				// todo add silenceTimeThreshold
@@ -149,6 +150,7 @@ public class UploadController {
 	private Path saveFile(MultipartFile file, String identifier) throws IOException {
 		byte[] bytes = file.getBytes();
 		Path path = Paths.get(FILE_STORAGE_PATH + File.separator + IN_PATH + File.separator + identifier + ".mp4");
+		Files.createDirectories(path);
 		Files.write(path, bytes);
 		return path;
 	}
