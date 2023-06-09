@@ -38,20 +38,21 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 				"-vn",
 				"-af",
 				"silencedetect=noise=" + noiseTolerance + "dB:d=" + minSegmentLength,
-				"-f", "null"
+				"-f", "null",
+				"-"
 		);
 
-		// FFmpeg writes to stderr instead of stdout for whatever reason...
-		processBuilder.redirectErrorStream(true);
 		Process process = processBuilder.start();
 
-		BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		// FFmpeg writes to stderr instead of stdout for whatever reason...
+		BufferedReader stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
 		List<Interval> intervals = new ArrayList<>();
 		Interval currentInterval = new Interval(0, false);
 		double mediaDuration = 0;
 		String line;
 
-		while ((line = stdOut.readLine()) != null) {
+		while ((line = stdErr.readLine()) != null) {
 			SilenceRemover.LOGGER.trace(line.toString());
 
 			if (line.contains("Duration")) {
