@@ -1,11 +1,12 @@
 package silenceremover.server;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import silenceremover.cli.SilenceRemoverCli;
+import silenceremover.server.cli.StartServerCommandProvider;
 
-@SpringBootApplication
 public class Main {
 	public static void main(String[] args) {
-		SpringApplication.run(Main.class, args);
+		SilenceRemoverCli cli = new SilenceRemoverCli(false);
+		cli.registerCommandProvider(new StartServerCommandProvider());
+		cli.processArgs(args);
 	}
 }
