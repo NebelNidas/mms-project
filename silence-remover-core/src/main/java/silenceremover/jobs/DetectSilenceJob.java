@@ -33,7 +33,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 	@Override
 	protected List<Interval> execute(DoubleConsumer progressReceiver) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder(
-				"ffmpeg.exe",
+				"ffmpeg",
 				"-i", inputFile.toString(),
 				"-vn",
 				"-af",
