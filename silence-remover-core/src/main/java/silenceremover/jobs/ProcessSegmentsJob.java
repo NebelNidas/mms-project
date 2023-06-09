@@ -18,6 +18,7 @@ import java.util.function.DoubleConsumer;
 import org.apache.commons.io.FileUtils;
 
 import job4j.Job;
+import job4j.JobState;
 
 import silenceremover.Interval;
 import silenceremover.SilenceRemover;
@@ -45,10 +46,12 @@ public class ProcessSegmentsJob extends Job<Path> {
 	@Override
 	protected Path execute(DoubleConsumer progressReceiver) throws Exception {
 		for (Job<?> subjob : getSubJobs(false)) {
+			if (state == JobState.CANCELING) return null;
+
 			subjob.run();
 		}
 
-		return config.outputFile;
+		return config.outputFile.toFile().exists() ? config.outputFile : null;
 	}
 
 	@Override
@@ -70,9 +73,11 @@ public class ProcessSegmentsJob extends Job<Path> {
 				for (Future<List<Path>> future : futures) {
 					splitFiles.addAll(future.get());
 					progressReceiver.accept((double) futures.indexOf(future) / futures.size());
+
+					if (state == JobState.CANCELING) break;
 				}
 
-				threadPool.shutdown();
+				threadPool.shutdownNow();
 				return null;
 			}
 		};
