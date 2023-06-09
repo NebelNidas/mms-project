@@ -140,8 +140,8 @@
 		const formData = new FormData();
 		formData.append('file', selectedFile);
 		formData.append('minSegmentLength', selectedConfig.minSegmentLength);
-		formData.append('maxVolume', selectedConfig.maxVolume);
-		formData.append('silenceTimeThreshold', selectedConfig.silenceTimeThreshold);
+		formData.append('maxNegativeVolumeDeviation', selectedConfig.maxNegativeVolumeDeviation);
+		formData.append('audibleSegmentPadding', selectedConfig.audibleSegmentPadding);
 		formData.append('identifier', ident);
 
 		fetch(`${API_URL}/upload`, { method: 'POST', body: formData})

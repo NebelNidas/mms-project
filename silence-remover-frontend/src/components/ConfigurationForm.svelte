@@ -7,14 +7,14 @@
 
 	let config = {
 		minSegmentLength: 0.3,
-		maxVolume: -35,
-		silenceTimeThreshold: 0.5,
+		maxNegativeVolumeDeviation: 35,
+		audibleSegmentPadding: 0.25,
 	};
 
 	let configValid = {
 		minSegmentLength: true,
-		maxVolume: true,
-		silenceTimeThreshold: true,
+		maxNegativeVolumeDeviation: true,
+		audibleSegmentPadding: true,
 	};
 
 	const dispatch = createEventDispatcher();
@@ -27,8 +27,8 @@
 	const castValues = (conf) => {
 		return {
 			minSegmentLength: parseFloat(conf.minSegmentLength),
-			maxVolume: parseFloat(conf.maxVolume),
-			silenceTimeThreshold: parseFloat(conf.silenceTimeThreshold),
+			maxNegativeVolumeDeviation: parseInt(conf.maxNegativeVolumeDeviation),
+			audibleSegmentPadding: parseFloat(conf.audibleSegmentPadding),
 		}
 	};
 </script>
@@ -98,23 +98,23 @@
 							hint="Minimum length a segment can be."
 							unit="s"
 							{disabled} />
-		<ConfigurationInput label="Maximum Volume"
-							id="max-volume"
+		<ConfigurationInput label="Maximum Negative Volume Deviation"
+							id="max-negative-volume-deviation"
 							type="number"
-							bind:value={config.maxVolume}
-							step=0.01
-							on:valid={v => configValid.maxVolume = v.detail}
-							hint="Threshold of when something is classified as silent."
+							bind:value={config.maxNegativeVolumeDeviation}
+							step=1
+							on:valid={v => configValid.maxNegativeVolumeDeviation = v.detail}
+							hint="Maximum negative volume deviation from the file's peak volume a segment is allowed to have in order to still be considered audible."
 							unit="dB"
 							{disabled} />
-		<ConfigurationInput label="Silence Time Threshold"
-							id="silence-time-threshold"
+		<ConfigurationInput label="Audible Segment Padding"
+							id="audible-segment-padding"
 							type="number"
 							validate={v => v >= 0}
 							step=0.01
-							bind:value={config.silenceTimeThreshold}
-							on:valid={v => configValid.silenceTimeThreshold = v.detail}
-							hint="Threshold  of the timespan when something should be cut out."
+							bind:value={config.audibleSegmentPadding}
+							on:valid={v => configValid.audibleSegmentPadding = v.detail}
+							hint="Padding in seconds that's added around audible segments, so the audio doesn't feel as cut off."
 							unit="s"
 							{disabled} />
 	</div>

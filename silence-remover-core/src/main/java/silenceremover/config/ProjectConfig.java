@@ -98,7 +98,7 @@ public class ProjectConfig {
 	public final double audibleSegmentPadding;
 	/**
 	 * Maximum negative volume deviation (in decibels) a segment is
-	 * allowed to have in order to still be considered silent.
+	 * allowed to have in order to still be considered audible.
 	 */
 	public final int maxNegativeVolumeDeviation;
 	public final boolean audioOnly;

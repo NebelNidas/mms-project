@@ -3,7 +3,6 @@ package silenceremover.jobs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
@@ -33,7 +32,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 				"-i", config.inputFile.toString(),
 				"-vn",
 				"-af",
-				"silencedetect=noise=-" + config.maxNegativeVolumeDeviation + "dB:d=" + config.minSegmentLength,
+				"silencedetect=noise=-" + (config.maxNegativeVolumeDeviation - 1) + "dB:d=" + config.minSegmentLength,
 				"-f", "null",
 				"-"
 		);

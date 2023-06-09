@@ -46,8 +46,8 @@ public class UploadController {
 	@PostMapping("/upload")
 	public ResponseEntity<String> handlePostRequest(@RequestParam("file") MultipartFile file,
 													@RequestParam("minSegmentLength") double minSegmentLength,
-													@RequestParam("maxVolume") double maxVolume,
-													@RequestParam("silenceTimeThreshold") double silenceTimeThreshold,
+													@RequestParam("maxNegativeVolumeDeviation") int maxNegativeVolumeDeviation,
+													@RequestParam("audibleSegmentPadding") double audibleSegmentPadding,
 													@RequestParam("identifier") String id) throws IOException {
 		if (id.length() < 20) {
 			return ResponseEntity.badRequest().body("Invalid params!");
@@ -61,9 +61,9 @@ public class UploadController {
 		Files.createDirectories(outPath);
 
 		ProjectConfig config = ProjectConfig.builder(inPath, outPath, Path.of("ffmpeg.exe"))
-				// todo add silenceTimeThreshold
 				.minSegmentLength(minSegmentLength)
-				.maxVolume(maxVolume)
+				.maxNegativeVolumeDeviation(maxNegativeVolumeDeviation)
+				.audibleSegmentPadding(audibleSegmentPadding)
 				.build();
 
 		Job<File> job = new SilenceRemover(config).process();
