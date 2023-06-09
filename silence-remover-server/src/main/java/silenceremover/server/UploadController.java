@@ -60,7 +60,7 @@ public class UploadController {
 		Path outPath = Paths.get(FILE_STORAGE_PATH + File.separator + OUT_PATH + File.separator + identifier + ".mp4");
 		Files.createDirectories(outPath);
 
-		ProjectConfig config = ProjectConfig.builder(inPath, outPath, Path.of("ffmpeg"))
+		ProjectConfig config = ProjectConfig.builder(inPath, outPath, Path.of("ffmpeg.exe"))
 				// todo add silenceTimeThreshold
 				.minSegmentLength(minSegmentLength)
 				.maxVolume(maxVolume)
