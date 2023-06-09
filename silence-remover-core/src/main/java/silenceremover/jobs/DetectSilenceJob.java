@@ -16,6 +16,8 @@ import silenceremover.Interval;
 import silenceremover.SilenceRemover;
 
 public class DetectSilenceJob extends Job<List<Interval>> {
+	private static final Pattern durationPattern = Pattern.compile("Duration: ([0-9:]+.?[0-9]*)");
+	private static final Pattern silencedetectPattern = Pattern.compile("\\[silencedetect @ [0-9xa-f]+] silence_([a-z]+): (-?[0-9]+.?[0-9]*[e-]*[0-9]*)");
 	private final Path inputFile;
 	private final double noiseTolerance;
 	private final double minSegmentLength;
@@ -54,8 +56,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 			SilenceRemover.LOGGER.trace(line.toString());
 
 			if (line.contains("Duration")) {
-				Pattern pattern = Pattern.compile("Duration: ([0-9:]+.?[0-9]*)");
-				Matcher matcher = pattern.matcher(line);
+				Matcher matcher = durationPattern.matcher(line);
 
 				if (!matcher.find()) {
 					continue;
@@ -69,8 +70,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 				int millisecond = Integer.parseInt(secondMillisecondParts[1]);
 				mediaDuration = Double.parseDouble(second + 60 * (minute + 60 * hour) + "." + millisecond);
 			} else if (line.contains("[silencedetect")) {
-				Pattern pattern = Pattern.compile("\\[silencedetect @ [0-9xa-f]+] silence_([a-z]+): (-?[0-9]+.?[0-9]*[e-]*[0-9]*)");
-				Matcher matcher = pattern.matcher(line);
+				Matcher matcher = silencedetectPattern.matcher(line);
 
 				if (!matcher.find()) {
 					continue;
