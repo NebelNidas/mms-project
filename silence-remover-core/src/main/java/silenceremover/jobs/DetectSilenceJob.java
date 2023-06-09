@@ -14,30 +14,26 @@ import job4j.Job;
 
 import silenceremover.Interval;
 import silenceremover.SilenceRemover;
+import silenceremover.config.ProjectConfig;
 
 public class DetectSilenceJob extends Job<List<Interval>> {
 	private static final Pattern durationPattern = Pattern.compile("Duration: ([0-9:]+.?[0-9]*)");
 	private static final Pattern silencedetectPattern = Pattern.compile("\\[silencedetect @ [0-9xa-f]+] silence_([a-z]+): (-?[0-9]+.?[0-9]*[e-]*[0-9]*)");
-	private final Path inputFile;
-	private final double noiseTolerance;
-	private final double minSegmentLength;
+	private final ProjectConfig config;
 
-	public DetectSilenceJob(Path inputFile, double noiseTolerance, double minSegmentLength) {
+	public DetectSilenceJob(ProjectConfig config) {
 		super(JobCategories.DETECT_INTERVALS);
-
-		this.inputFile = inputFile;
-		this.noiseTolerance = noiseTolerance;
-		this.minSegmentLength = minSegmentLength;
+		this.config = config;
 	}
 
 	@Override
 	protected List<Interval> execute(DoubleConsumer progressReceiver) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder(
 				"ffmpeg",
-				"-i", inputFile.toString(),
+				"-i", config.inputFile.toString(),
 				"-vn",
 				"-af",
-				"silencedetect=noise=" + noiseTolerance + "dB:d=" + minSegmentLength,
+				"silencedetect=noise=-" + config.maxNegativeVolumeDeviation + "dB:d=" + config.minSegmentLength,
 				"-f", "null",
 				"-"
 		);

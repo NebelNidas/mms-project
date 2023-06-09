@@ -31,14 +31,11 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.MIN_SEGMENT_LENGTH})
 		Double minSegmentLength;
 
-		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
-		Double maxVolume;
+		@Parameter(names = {BuiltinCliParameters.MAX_NEGATIVE_VOLUME_DEVIATION})
+		Integer maxNegVolumeDeviation;
 
 		@Parameter(names = {BuiltinCliParameters.AUDIBLE_SEGMENT_PADDING})
 		Double audibleSegmentPadding;
-
-		@Parameter(names = {BuiltinCliParameters.NOISE_TOLERANCE})
-		Integer noiseTolerance;
 
 		@Parameter(names = {BuiltinCliParameters.AUDIO_ONLY})
 		Boolean audioOnly;
@@ -69,9 +66,8 @@ public class ProcessCommandProvider implements CliCommandProvider {
 
 		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile, command.ffmpegExecutable)
 				.minSegmentLength(command.minSegmentLength)
-				.maxVolume(command.maxVolume)
+				.maxNegativeVolumeDeviation(command.maxNegVolumeDeviation)
 				.audibleSegmentPadding(command.audibleSegmentPadding)
-				.noiseTolerance(command.noiseTolerance)
 				.audioOnly(command.audioOnly)
 				.maxThreads(command.maxThreads)
 				.threadsPerFfmpegInstance(command.threadsPerFfmpegInstance)
