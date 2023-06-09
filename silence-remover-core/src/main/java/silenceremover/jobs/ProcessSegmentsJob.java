@@ -38,35 +38,55 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 		this.config = config;
 		this.tempDir = config.outputFile.toAbsolutePath().getParent().resolve("silence-remover-temp");
-		this.tempDir.toFile().mkdirs();
 		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / config.threadsPerFfmpegInstance));
 		this.intervals = intervals;
 	}
 
 	@Override
 	protected Path execute(DoubleConsumer progressReceiver) throws Exception {
-		process();
+		for (Job<?> subjob : getSubJobs(false)) {
+			subjob.run();
+		}
+
 		return config.outputFile;
 	}
 
-	public void process() throws Exception {
-		collectIntervalGroups();
+	@Override
+	protected void registerSubJobs() {
+		Job<Void> job = new Job<Void>(JobCategories.SPLIT_SEGMENTS) {
+			@Override
+			protected Void execute(DoubleConsumer progressReceiver) throws Exception {
+				deleteTempDir();
+				tempDir.toFile().mkdirs();
 
-		int id = 0;
-		List<Future<List<Path>>> futures = new ArrayList<>();
+				collectIntervalGroups();
+				List<Future<List<Path>>> futures = new ArrayList<>();
 
-		for (List<Interval> group : audibleIntervalGroups) {
-			futures.add(threadPool.submit(new SplitThread(id, config, group, config.threadsPerFfmpegInstance,
-					this::getTempFileForInterval, this::onSplitTaskProgressChange)::call));
-			id += config.segmentsPerFfmpegInstance;
-		}
+				for (List<Interval> group : audibleIntervalGroups) {
+					futures.add(threadPool.submit(new SplitThread(config, group,
+							config.threadsPerFfmpegInstance, ProcessSegmentsJob.this::getTempFileForInterval)::call));
+				}
 
-		for (Future<List<Path>> future : futures) {
-			splitFiles.addAll(future.get());
-		}
+				for (Future<List<Path>> future : futures) {
+					splitFiles.addAll(future.get());
+					progressReceiver.accept((double) futures.indexOf(future) / futures.size());
+				}
 
-		threadPool.shutdown();
-		mergeSegments();
+				threadPool.shutdown();
+				return null;
+			}
+		};
+		addSubJob(job, true);
+
+		job = new Job<Void>(JobCategories.MERGE_SEGMENTS) {
+			@Override
+			protected Void execute(DoubleConsumer progressReceiver) throws Exception {
+				mergeSegments(progressReceiver);
+				deleteTempDir();
+				return null;
+			}
+		};
+		addSubJob(job, true);
 	}
 
 	private void collectIntervalGroups() {
@@ -90,31 +110,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 		return tempDir.resolve(audibleIntervals.indexOf(interval) + ".mp4");
 	}
 
-	private void onSplitTaskProgressChange(double progress) {
-		onOwnProgressChange(progress / audibleIntervals.size() / 2);
-	}
-
-	private void mergeSegments() throws IOException {
-		// try {
-		// 	FFmpeg ffmpeg = new FFmpeg("ffmpeg.exe");
-		// 	FFprobe ffprobe = new FFprobe("ffprobe.exe");
-		// 	FFmpegProbeResult probeResult = ffprobe.probe(config.inputFile.toString());
-
-		// 	FFmpegBuilder builder = new FFmpegBuilder()
-		// 			.setInput(probeResult)
-		// 			.overrideOutputFiles(true)
-		// 			.addExtraArgs("-vn")
-		// 			.addOutput(config.outputFile.toString())
-		// 			.setTargetSize(250_000)
-		// 			.done();
-
-		// 	FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
-
-		// 	executor.createJob(builder).run();
-		// } catch (Throwable e) {
-		// 	throw new RuntimeException(e);
-		// }
-
+	private void mergeSegments(DoubleConsumer progressReceiver) throws IOException {
 		List<String> command = new ArrayList<>();
 		command.add("ffmpeg");
 		command.add("-f");
@@ -142,37 +138,26 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("verbose");
 		command.add(config.outputFile.toAbsolutePath().toString());
 
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.redirectErrorStream(true);
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.redirectErrorStream(true);
 
-			Process process = processBuilder.start();
-			BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		Process process = processBuilder.start();
+		BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-			int fileIndex = 1;
-			String line;
+		int fileIndex = 1;
+		String line;
 
-			while ((line = stdOut.readLine()) != null) {
-				SilenceRemover.LOGGER.info(line.toString());
+		while ((line = stdOut.readLine()) != null) {
+			SilenceRemover.LOGGER.trace(line.toString());
 
-				if (line.contains("Auto-inserting")) {
-					onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
-					fileIndex++;
-				}
+			if (line.contains("Auto-inserting")) {
+				progressReceiver.accept((double) fileIndex / audibleIntervals.size());
+				fileIndex++;
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		try {
-			cleanUp();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
-	private void cleanUp() throws IOException {
+	private void deleteTempDir() throws IOException {
 		FileUtils.deleteDirectory(tempDir.toFile());
-		threadPool.shutdownNow();
 	}
 }

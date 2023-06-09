@@ -51,7 +51,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 		String line;
 
 		while ((line = stdErr.readLine()) != null) {
-			SilenceRemover.LOGGER.info(line.toString());
+			SilenceRemover.LOGGER.trace(line.toString());
 
 			if (line.contains("Duration")) {
 				Pattern pattern = Pattern.compile("Duration: ([0-9:]+.?[0-9]*)");
