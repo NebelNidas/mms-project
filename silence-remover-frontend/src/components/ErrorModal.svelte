@@ -1,10 +1,12 @@
 <script>
 	export let message = '';
 	export let show = true;
+	export let onClosed;
 
 	const hide = () => {
 		show = false;
 		message = null;
+		onClosed();
 	};
 </script>
 

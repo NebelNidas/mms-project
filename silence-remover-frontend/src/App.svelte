@@ -19,6 +19,10 @@
 	let progress = null;
 
 	onMount(async () => {
+		checkExistingIdentifier();
+	});
+
+	const checkExistingIdentifier = async () => {
 		identifier = getIdentifier();
 		if (identifier) {
 			if (await eventSourceExists(identifier)) {
@@ -32,7 +36,7 @@
 				await handleResultReady(false);
 			}
 		}
-	});
+	};
 
 	const eventSourceExists = async identifier => {
 		try {
@@ -184,7 +188,7 @@
 	{/if}
 
 	{#if error}
-		<ErrorModal bind:message={error} />
+		<ErrorModal bind:message={error} on:closed={checkExistingIdentifier}/>
 	{/if}
 </main>
 
