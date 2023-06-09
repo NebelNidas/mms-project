@@ -20,11 +20,11 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 	private final double noiseTolerance;
 	private final double minSegmentLength;
 
-	public DetectSilenceJob(Path inputFile, double silenceLevel, double minSegmentLength) {
+	public DetectSilenceJob(Path inputFile, double noiseTolerance, double minSegmentLength) {
 		super(JobCategories.DETECT_INTERVALS);
 
 		this.inputFile = inputFile;
-		this.noiseTolerance = silenceLevel;
+		this.noiseTolerance = noiseTolerance;
 		this.minSegmentLength = minSegmentLength;
 	}
 
