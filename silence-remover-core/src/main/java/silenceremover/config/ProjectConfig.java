@@ -87,7 +87,7 @@ public class ProjectConfig {
 	public final Path outputFile;
 	public final Path ffmpegExecutable;
 	/**
-	 * Minimum length in minutes a silent segment is allowed
+	 * Minimum length in seconds a silent segment is allowed
 	 * to have in order to be removed.
 	 */
 	public final double minSegmentLength;
