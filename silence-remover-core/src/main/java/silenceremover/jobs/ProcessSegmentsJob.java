@@ -7,14 +7,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.DoubleConsumer;
 
 import org.apache.commons.io.FileUtils;
@@ -27,13 +25,10 @@ import silenceremover.SplitThread;
 import silenceremover.config.ProjectConfig;
 
 public class ProcessSegmentsJob extends Job<Path> {
-	private static final int intervalsPerFfmpegInstance = 2;
-	private static final int threadsPerFfmpegInstance = 4;
 	private final ProjectConfig config;
 	private final Path tempDir;
 	private final ExecutorService threadPool;
 	private final List<Interval> intervals;
-	private final AtomicInteger splitsCompleted = new AtomicInteger();
 	private List<Interval> audibleIntervals;
 	private Queue<List<Interval>> audibleIntervalGroups = new ConcurrentLinkedQueue<>();
 	private List<Path> splitFiles = new ArrayList<>();
@@ -44,7 +39,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 		this.config = config;
 		this.tempDir = config.outputFile.toAbsolutePath().getParent().resolve("silence-remover-temp");
 		this.tempDir.toFile().mkdirs();
-		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / threadsPerFfmpegInstance));
+		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / config.threadsPerFfmpegInstance));
 		this.intervals = intervals;
 	}
 
@@ -61,19 +56,21 @@ public class ProcessSegmentsJob extends Job<Path> {
 		List<Future<List<Path>>> futures = new ArrayList<>();
 
 		for (List<Interval> group : audibleIntervalGroups) {
-			futures.add(threadPool.submit(new SplitThread(id, config, group, this::getTempFileForInterval, this::onSplitTaskProgressChange)::call));
-			id += intervalsPerFfmpegInstance;
+			futures.add(threadPool.submit(new SplitThread(id, config, group, config.threadsPerFfmpegInstance,
+					this::getTempFileForInterval, this::onSplitTaskProgressChange)::call));
+			id += config.segmentsPerFfmpegInstance;
 		}
 
 		for (Future<List<Path>> future : futures) {
 			splitFiles.addAll(future.get());
 		}
 
+		threadPool.shutdown();
 		mergeSegments();
 	}
 
 	private void collectIntervalGroups() {
-		List<Interval> intervalGroup = new ArrayList<>(intervalsPerFfmpegInstance);
+		List<Interval> intervalGroup = new ArrayList<>(config.segmentsPerFfmpegInstance);
 		audibleIntervals = intervals.stream()
 				.filter(interval -> !interval.isSilent())
 				.toList();
@@ -81,10 +78,10 @@ public class ProcessSegmentsJob extends Job<Path> {
 		for (int i = 0; i < audibleIntervals.size(); i++) {
 			intervalGroup.add(audibleIntervals.get(i));
 
-			if ((i != 0 && i % intervalsPerFfmpegInstance == 0)
+			if ((i != 0 && i % config.segmentsPerFfmpegInstance == 0)
 					|| i == audibleIntervals.size() - 1) {
 				audibleIntervalGroups.add(intervalGroup);
-				intervalGroup = new ArrayList<>(intervalsPerFfmpegInstance);
+				intervalGroup = new ArrayList<>(config.segmentsPerFfmpegInstance);
 			}
 		}
 	}
@@ -98,8 +95,6 @@ public class ProcessSegmentsJob extends Job<Path> {
 	}
 
 	private void mergeSegments() throws IOException {
-		splitFiles.sort(Comparator.naturalOrder());
-
 		// try {
 		// 	FFmpeg ffmpeg = new FFmpeg("ffmpeg.exe");
 		// 	FFprobe ffprobe = new FFprobe("ffprobe.exe");
@@ -141,6 +136,8 @@ public class ProcessSegmentsJob extends Job<Path> {
 		command.add("-c");
 		command.add("copy");
 		command.add("-y");
+		command.add("-threads");
+		command.add(Integer.toString(config.maxThreads));
 		command.add("-loglevel");
 		command.add("verbose");
 		command.add(config.outputFile.toAbsolutePath().toString());
@@ -159,8 +156,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 				SilenceRemover.LOGGER.info(line.toString());
 
 				if (line.contains("Auto-inserting")) {
-					double percentage = (double) fileIndex / audibleIntervals.size() / 2;
-					onOwnProgressChange(percentage);
+					onOwnProgressChange((double) fileIndex / audibleIntervals.size() / 2);
 					fileIndex++;
 				}
 			}
@@ -177,5 +173,6 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 	private void cleanUp() throws IOException {
 		FileUtils.deleteDirectory(tempDir.toFile());
+		threadPool.shutdownNow();
 	}
 }

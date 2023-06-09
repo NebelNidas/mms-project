@@ -26,16 +26,22 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		Path outputFile;
 
 		@Parameter(names = {BuiltinCliParameters.MIN_SEGMENT_LENGTH})
-		double minSegmentLength = 0.2;
+		Double minSegmentLength;
 
 		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
-		double maxVolume = 0.3;
+		Double maxVolume;
 
 		@Parameter(names = {BuiltinCliParameters.AUDIO_ONLY})
-		boolean audioOnly = false;
+		Boolean audioOnly;
 
 		@Parameter(names = {BuiltinCliParameters.MAX_THREADS})
-		int maxThreads = Runtime.getRuntime().availableProcessors() / 2;
+		Integer maxThreads;
+
+		@Parameter(names = {BuiltinCliParameters.THREADS_PER_FFMPEG_INSTANCE})
+		Integer threadsPerFfmpegInstance;
+
+		@Parameter(names = {BuiltinCliParameters.SEGMENTS_PER_FFMPEG_INSTANCE})
+		Integer segmentsPerFfmpegInstance;
 	}
 
 	@Override
@@ -57,6 +63,8 @@ public class ProcessCommandProvider implements CliCommandProvider {
 				.maxVolume(command.maxVolume)
 				.audioOnly(command.audioOnly)
 				.maxThreads(command.maxThreads)
+				.threadsPerFfmpegInstance(command.threadsPerFfmpegInstance)
+				.segmentsPerFfmpegInstance(command.segmentsPerFfmpegInstance)
 				.build();
 		SilenceRemover silenceRemover = new SilenceRemover(config);
 		AtomicInteger lastPrintedPercentage = new AtomicInteger(-1);

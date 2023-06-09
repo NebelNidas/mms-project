@@ -16,13 +16,15 @@ public class SplitThread implements Callable<List<Path>> {
 	private final int id;
 	private final ProjectConfig config;
 	private final List<Interval> intervals;
+	private final int threads;
 	private final DoubleConsumer progressReceiver;
 	private final Function<Interval, Path> tempFileGenerator;
 
-	public SplitThread(int id, ProjectConfig config, List<Interval> intervals,
+	public SplitThread(int id, ProjectConfig config, List<Interval> intervals, int threads,
 			Function<Interval, Path> tempFileGenerator, DoubleConsumer progressReceiver) {
 		this.id = id;
 		this.config = config;
+		this.threads = threads;
 		this.tempFileGenerator = tempFileGenerator;
 		this.intervals = intervals;
 		this.progressReceiver = progressReceiver;
@@ -90,6 +92,8 @@ public class SplitThread implements Callable<List<Path>> {
 			commandParts.add("1");
 			commandParts.add("-safe");
 			commandParts.add("0");
+			commandParts.add("-threads");
+			commandParts.add(Integer.toString(threads));
 			commandParts.add("-ignore_unknown");
 			commandParts.add("-y");
 

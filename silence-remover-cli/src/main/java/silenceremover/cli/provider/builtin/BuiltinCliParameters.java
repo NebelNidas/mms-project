@@ -7,4 +7,6 @@ public class BuiltinCliParameters {
 	public static final String MAX_VOLUME = "--max-volume";
 	public static final String AUDIO_ONLY = "--audio-only";
 	public static final String MAX_THREADS = "--max-threads";
+	public static final String THREADS_PER_FFMPEG_INSTANCE = "--threads-per-ffmpeg-instance";
+	public static final String SEGMENTS_PER_FFMPEG_INSTANCE = "--segments-per-ffmpeg-instance";
 }
