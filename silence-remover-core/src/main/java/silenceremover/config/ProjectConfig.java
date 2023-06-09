@@ -8,6 +8,7 @@ public class ProjectConfig {
 		protected final Path outputFile;
 		protected Double minSegmentLength;
 		protected Double maxVolume;
+		protected Double audibleSegmentPadding;
 		protected Integer noiseTolerance;
 		protected Boolean audioOnly;
 		protected Integer maxThreads = Runtime.getRuntime().availableProcessors() / 2;
@@ -26,6 +27,11 @@ public class ProjectConfig {
 
 		public Builder maxVolume(Double maxVolume) {
 			this.maxVolume = maxVolume;
+			return this;
+		}
+
+		public Builder audibleSegmentPadding(Double audibleSegmentPadding) {
+			this.audibleSegmentPadding = audibleSegmentPadding;
 			return this;
 		}
 
@@ -57,6 +63,7 @@ public class ProjectConfig {
 		public ProjectConfig build() {
 			if (minSegmentLength == null) minSegmentLength = 0.4;
 			if (maxVolume == null) maxVolume = 0.3;
+			if (audibleSegmentPadding == null) audibleSegmentPadding = 0.2;
 			if (noiseTolerance == null) noiseTolerance = -50;
 			if (audioOnly == null) audioOnly = false;
 			if (maxThreads == null) maxThreads = Runtime.getRuntime().availableProcessors() / 2;
@@ -68,6 +75,7 @@ public class ProjectConfig {
 					outputFile,
 					minSegmentLength,
 					maxVolume,
+					audibleSegmentPadding,
 					noiseTolerance,
 					audioOnly,
 					maxThreads,
@@ -88,6 +96,11 @@ public class ProjectConfig {
 	 */
 	public final double minSegmentLength;
 	/**
+	 * Padding in seconds that's added around audible segments,
+	 * so the audio doesn't feel as cut off.
+	 */
+	public final double audibleSegmentPadding;
+	/**
 	 * Maximum volume (in a range from 0 to 1) a segment is
 	 * allowed to have in order to still be considered silent.
 	 */
@@ -106,6 +119,7 @@ public class ProjectConfig {
 			Path outputFile,
 			double minSegmentLength,
 			double maxVolume,
+			double audibleSegmentPadding,
 			int noiseTolerance,
 			boolean audioOnly,
 			int maxThreads,
@@ -115,6 +129,7 @@ public class ProjectConfig {
 		this.outputFile = outputFile;
 		this.minSegmentLength = minSegmentLength;
 		this.maxVolume = maxVolume;
+		this.audibleSegmentPadding = audibleSegmentPadding;
 		this.noiseTolerance = noiseTolerance;
 		this.audioOnly = audioOnly;
 		this.maxThreads = maxThreads;

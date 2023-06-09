@@ -27,7 +27,7 @@ public class SilenceRemover {
 
 	public Job<File> process() {
 		var detectIntervalsJob = new DetectSilenceJob(config.inputFile, config.noiseTolerance, config.minSegmentLength);
-		var processIntervalsJob = new ProcessIntervalsJob(intervals);
+		var processIntervalsJob = new ProcessIntervalsJob(config, intervals);
 		var processSegmentsJob = new ProcessSegmentsJob(config, intervals);
 
 		return new Job<File>(JobCategories.PROCESS_FILE, config.inputFile.toFile().getName()) {

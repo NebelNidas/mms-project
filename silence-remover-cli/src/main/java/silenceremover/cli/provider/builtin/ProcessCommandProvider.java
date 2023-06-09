@@ -31,6 +31,9 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
 		Double maxVolume;
 
+		@Parameter(names = {BuiltinCliParameters.AUDIBLE_SEGMENT_PADDING})
+		Double audibleSegmentPadding;
+
 		@Parameter(names = {BuiltinCliParameters.NOISE_TOLERANCE})
 		Integer noiseTolerance;
 
@@ -64,6 +67,7 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile)
 				.minSegmentLength(command.minSegmentLength)
 				.maxVolume(command.maxVolume)
+				.audibleSegmentPadding(command.audibleSegmentPadding)
 				.noiseTolerance(command.noiseTolerance)
 				.audioOnly(command.audioOnly)
 				.maxThreads(command.maxThreads)

@@ -8,13 +8,16 @@ import job4j.Job;
 import job4j.JobState;
 
 import silenceremover.Interval;
+import silenceremover.config.ProjectConfig;
 
 public class ProcessIntervalsJob extends Job<Void> {
+	private ProjectConfig config;
 	private final List<Interval> intervals;
 
-	public ProcessIntervalsJob(List<Interval> intervals) {
+	public ProcessIntervalsJob(ProjectConfig config, List<Interval> intervals) {
 		super(JobCategories.PROCESS_INTERVALS);
 
+		this.config = config;
 		this.intervals = intervals;
 	}
 
@@ -24,7 +27,7 @@ public class ProcessIntervalsJob extends Job<Void> {
 		progressReceiver.accept(0.5);
 		if (state == JobState.CANCELING) return null;
 
-		addPaddingToAudibleSegments(0.25);
+		addPaddingToAudibleSegments();
 		return null;
 	}
 
@@ -55,12 +58,12 @@ public class ProcessIntervalsJob extends Job<Void> {
 		intervals.addAll(combinedIntervals);
 	}
 
-	private void addPaddingToAudibleSegments(double padding) {
+	private void addPaddingToAudibleSegments() {
 		for (int i = 0; i < intervals.size(); i++) {
 			Interval interval = intervals.get(i);
 
 			if (!interval.isSilent()) {
-				interval.addPadding(padding, i == 0, i == intervals.size() - 1);
+				interval.addPadding(config.audibleSegmentPadding, i == 0, i == intervals.size() - 1);
 			}
 		}
 	}
