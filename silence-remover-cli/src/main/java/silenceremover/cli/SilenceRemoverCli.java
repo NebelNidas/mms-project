@@ -10,6 +10,14 @@ import com.beust.jcommander.JCommander;
 import silenceremover.cli.provider.CliCommandProvider;
 import silenceremover.cli.provider.CliParameterProvider;
 
+/**
+ * Main CLI arg handler.
+ * You have to first register your {@link CliParameterProvider}s and/or {@link CliCommandProvider}s
+ * via their respective register methods, and then call {@link #processArgs(String[])}.
+ * JCommander attempts to parse the passed args into the providers, and if applicable,
+ * then proceeds to call their own {@code processArgs} methods, from where they're free
+ * to handle the parsed arguments as needed.
+ */
 public class SilenceRemoverCli {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Silence Remover CLI");
 	private final List<CliParameterProvider> paramProviders = new ArrayList<>(5);
@@ -31,10 +39,12 @@ public class SilenceRemoverCli {
 	public void processArgs(String[] args) {
 		JCommander.Builder jcBuilder = JCommander.newBuilder();
 
+		// Top level parameter providers
 		for (CliParameterProvider paramProvider : paramProviders) {
 			jcBuilder.addObject(paramProvider.getDataHolder());
 		}
 
+		// Command providers
 		for (CliCommandProvider commandProvider : commandProviders) {
 			jcBuilder.addCommand(commandProvider.getCommandName(), commandProvider.getDataHolder());
 		}

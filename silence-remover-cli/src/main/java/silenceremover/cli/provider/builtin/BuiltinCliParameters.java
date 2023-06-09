@@ -1,5 +1,8 @@
 package silenceremover.cli.provider.builtin;
 
+/**
+ * All CLI parameters the CLI module can handle by default.
+ */
 public class BuiltinCliParameters {
 	public static final String INPUT_FILE = "--input-file";
 	public static final String OUTPUT_FILE = "--output-file";

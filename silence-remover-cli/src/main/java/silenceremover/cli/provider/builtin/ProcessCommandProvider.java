@@ -13,6 +13,9 @@ import silenceremover.cli.SilenceRemoverCli;
 import silenceremover.cli.provider.CliCommandProvider;
 import silenceremover.config.ProjectConfig;
 
+/**
+ * Provides the default {@code process} command.
+ */
 public class ProcessCommandProvider implements CliCommandProvider {
 	private static final String commandName = "process";
 	private final ProcessCommand command = new ProcessCommand();

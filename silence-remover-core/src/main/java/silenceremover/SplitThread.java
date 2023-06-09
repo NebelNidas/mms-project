@@ -42,10 +42,10 @@ public class SplitThread implements Callable<List<Path>> {
 		try {
 			process = processBuilder.start();
 
-			BufferedReader stream = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line;
 
-			while ((line = stream.readLine()) != null) {
+			while ((line = stdOut.readLine()) != null) {
 				SilenceRemover.LOGGER.trace(line.toString());
 			}
 

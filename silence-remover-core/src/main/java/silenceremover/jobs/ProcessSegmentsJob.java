@@ -94,6 +94,10 @@ public class ProcessSegmentsJob extends Job<Path> {
 		addSubJob(job, true);
 	}
 
+	/**
+	 * Groups intervals into interval groups, whose size is
+	 * based on the configured segments per ffmpeg instance.
+	 */
 	private void collectIntervalGroups() {
 		List<Interval> intervalGroup = new ArrayList<>(config.segmentsPerFfmpegInstance);
 		audibleIntervals = intervals.stream()
@@ -118,9 +122,9 @@ public class ProcessSegmentsJob extends Job<Path> {
 	private void mergeSegments(DoubleConsumer progressReceiver) throws IOException {
 		List<String> command = new ArrayList<>();
 		command.add(config.ffmpegExecutable.toAbsolutePath().toString());
-		command.add("-f");
+		command.add("-f"); // Needed for concat option?
 		command.add("concat");
-		command.add("-safe");
+		command.add("-safe"); // Helps with relative paths
 		command.add("0");
 		command.add("-i");
 
@@ -135,7 +139,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 		command.add(txtFile.toString());
 		command.add("-c");
-		command.add("copy");
+		command.add("copy"); // Copy codecs
 		command.add("-y");
 		command.add("-threads");
 		command.add(Integer.toString(config.maxThreads));
@@ -156,6 +160,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 			SilenceRemover.LOGGER.trace(line.toString());
 
 			if (line.contains("Auto-inserting")) {
+				// Logged every time a new file gets merged in
 				progressReceiver.accept((double) fileIndex / audibleIntervals.size());
 				fileIndex++;
 			}
