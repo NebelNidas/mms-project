@@ -3,6 +3,8 @@
 build/
 out/
 classes/
+*.exe
+*.mp4
 
 # IntelliJ Idea
 .idea/
