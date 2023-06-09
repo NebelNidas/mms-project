@@ -77,7 +77,7 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		job.addProgressListener((progress) -> {
 			int percentage = (int) (progress * 100);
 
-			if (percentage != lastPrintedPercentage.get() && percentage % 10 == 0) {
+			if (Math.abs(percentage - lastPrintedPercentage.get()) > 5) {
 				SilenceRemoverCli.LOGGER.info("{}% ... ", percentage);
 				lastPrintedPercentage.set(percentage);
 			}
