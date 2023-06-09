@@ -45,9 +45,9 @@ public class UploadController {
 
 	@PostMapping("/upload")
 	public ResponseEntity<String> handlePostRequest(@RequestParam("file") MultipartFile file,
-													@RequestParam("minSegmentLength") float minSegmentLength,
-													@RequestParam("maxVolume") float maxVolume,
-													@RequestParam("silenceTimeThreshold") float silenceTimeThreshold,
+													@RequestParam("minSegmentLength") double minSegmentLength,
+													@RequestParam("maxVolume") double maxVolume,
+													@RequestParam("silenceTimeThreshold") double silenceTimeThreshold,
 													@RequestParam("identifier") String id) throws IOException {
 		if (id.length() < 20) {
 			return ResponseEntity.badRequest().body("Invalid params!");
