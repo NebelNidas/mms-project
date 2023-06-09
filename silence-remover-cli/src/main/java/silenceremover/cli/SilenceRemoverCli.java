@@ -43,6 +43,11 @@ public class SilenceRemoverCli {
 		jCommander.setAcceptUnknownOptions(acceptUnknownParams);
 		jCommander.parse(args);
 
+		if (args.length == 0) {
+			jCommander.usage();
+			return;
+		}
+
 		for (CliParameterProvider paramProvider : paramProviders) {
 			paramProvider.processArgs();
 		}
