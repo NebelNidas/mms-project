@@ -64,7 +64,7 @@ public class ProjectConfig {
 			if (minSegmentLength == null) minSegmentLength = 0.4;
 			if (maxVolume == null) maxVolume = 0.3;
 			if (audibleSegmentPadding == null) audibleSegmentPadding = 0.2;
-			if (noiseTolerance == null) noiseTolerance = -50;
+			if (noiseTolerance == null) noiseTolerance = -30;
 			if (audioOnly == null) audioOnly = false;
 			if (maxThreads == null) maxThreads = Runtime.getRuntime().availableProcessors() / 2;
 			if (threadsPerFfmpegInstance == null) threadsPerFfmpegInstance = maxThreads / 2;
