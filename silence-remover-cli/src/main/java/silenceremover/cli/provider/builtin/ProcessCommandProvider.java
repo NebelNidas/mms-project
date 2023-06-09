@@ -25,6 +25,9 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.OUTPUT_FILE}, required = true)
 		Path outputFile;
 
+		@Parameter(names = {BuiltinCliParameters.FFMPEG_EXECUTABLE}, required = true)
+		Path ffmpegExecutable;
+
 		@Parameter(names = {BuiltinCliParameters.MIN_SEGMENT_LENGTH})
 		Double minSegmentLength;
 
@@ -64,7 +67,7 @@ public class ProcessCommandProvider implements CliCommandProvider {
 	public void processArgs() {
 		validateArgs();
 
-		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile)
+		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile, command.ffmpegExecutable)
 				.minSegmentLength(command.minSegmentLength)
 				.maxVolume(command.maxVolume)
 				.audibleSegmentPadding(command.audibleSegmentPadding)
@@ -97,6 +100,10 @@ public class ProcessCommandProvider implements CliCommandProvider {
 
 		if (command.outputFile.toFile().exists()) {
 			throw new IllegalArgumentException("Output file already exist!");
+		}
+
+		if (!command.ffmpegExecutable.toFile().exists()) {
+			throw new IllegalArgumentException("Passed FFmpeg executable doesn't exist!");
 		}
 	}
 }

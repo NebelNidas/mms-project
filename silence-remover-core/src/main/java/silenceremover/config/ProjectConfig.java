@@ -6,6 +6,7 @@ public class ProjectConfig {
 	public static class Builder {
 		protected final Path inputFile;
 		protected final Path outputFile;
+		protected final Path ffmpegExecutable;
 		protected Double minSegmentLength;
 		protected Double maxVolume;
 		protected Double audibleSegmentPadding;
@@ -15,9 +16,10 @@ public class ProjectConfig {
 		protected Integer threadsPerFfmpegInstance = maxThreads;
 		protected Integer segmentsPerFfmpegInstance;
 
-		private Builder(Path inputFile, Path outputFile) {
+		private Builder(Path inputFile, Path outputFile, Path ffmpegExecutable) {
 			this.inputFile = inputFile;
 			this.outputFile = outputFile;
+			this.ffmpegExecutable = ffmpegExecutable;
 		}
 
 		public Builder minSegmentLength(Double minSegmentLength) {
@@ -63,7 +65,7 @@ public class ProjectConfig {
 		public ProjectConfig build() {
 			if (minSegmentLength == null) minSegmentLength = 0.4;
 			if (maxVolume == null) maxVolume = 0.3;
-			if (audibleSegmentPadding == null) audibleSegmentPadding = 0.2;
+			if (audibleSegmentPadding == null) audibleSegmentPadding = 0.25;
 			if (noiseTolerance == null) noiseTolerance = -30;
 			if (audioOnly == null) audioOnly = false;
 			if (maxThreads == null) maxThreads = Runtime.getRuntime().availableProcessors() / 2;
@@ -73,6 +75,7 @@ public class ProjectConfig {
 			return new ProjectConfig(
 					inputFile,
 					outputFile,
+					ffmpegExecutable,
 					minSegmentLength,
 					maxVolume,
 					audibleSegmentPadding,
@@ -84,12 +87,13 @@ public class ProjectConfig {
 		}
 	}
 
-	public static Builder builder(Path inputFile, Path outputFile) {
-		return new Builder(inputFile, outputFile);
+	public static Builder builder(Path inputFile, Path outputFile, Path ffmpegExecutable) {
+		return new Builder(inputFile, outputFile, ffmpegExecutable);
 	}
 
 	public final Path inputFile;
 	public final Path outputFile;
+	public final Path ffmpegExecutable;
 	/**
 	 * Minimum length in minutes a silent segment is allowed
 	 * to have in order to be removed.
@@ -117,6 +121,7 @@ public class ProjectConfig {
 	private ProjectConfig(
 			Path inputFile,
 			Path outputFile,
+			Path ffmpegExecutable,
 			double minSegmentLength,
 			double maxVolume,
 			double audibleSegmentPadding,
@@ -127,6 +132,7 @@ public class ProjectConfig {
 			int segmentsPerFfmpegInstance) {
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
+		this.ffmpegExecutable = ffmpegExecutable;
 		this.minSegmentLength = minSegmentLength;
 		this.maxVolume = maxVolume;
 		this.audibleSegmentPadding = audibleSegmentPadding;

@@ -10,7 +10,9 @@
 				"--input-file",
 				"input.mp4",
 				"--output-file",
-				"output.mp4"
+				"output.mp4",
+				"--ffmpeg-executable",
+				"ffmpeg.exe"
 			]
 		}
 	]

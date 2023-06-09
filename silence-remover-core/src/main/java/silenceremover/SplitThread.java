@@ -63,7 +63,7 @@ public class SplitThread implements Callable<List<Path>> {
 
 	private String[] generateCommand(List<Path> outputFiles, boolean applyFilter, double minimumIntervalDuration) {
 		List<String> commandParts = new ArrayList<>();
-		commandParts.add("ffmpeg");
+		commandParts.add(config.ffmpegExecutable.toAbsolutePath().toString());
 
 		for (Interval interval : intervals) {
 			commandParts.add("-i");

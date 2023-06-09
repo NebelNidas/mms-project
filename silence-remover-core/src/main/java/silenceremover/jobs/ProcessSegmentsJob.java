@@ -117,7 +117,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 	private void mergeSegments(DoubleConsumer progressReceiver) throws IOException {
 		List<String> command = new ArrayList<>();
-		command.add("ffmpeg");
+		command.add(config.ffmpegExecutable.toAbsolutePath().toString());
 		command.add("-f");
 		command.add("concat");
 		command.add("-safe");
