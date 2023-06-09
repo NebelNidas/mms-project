@@ -17,15 +17,15 @@ import silenceremover.SilenceRemover;
 
 public class DetectSilenceJob extends Job<List<Interval>> {
 	private final Path inputFile;
-	private final double silenceLevel;
-	private final double silenceTimeThreshold;
+	private final double noiseTolerance;
+	private final double minSegmentLength;
 
-	public DetectSilenceJob(Path inputFile, double silenceLevel, double silenceTimeThreshold) {
+	public DetectSilenceJob(Path inputFile, double silenceLevel, double minSegmentLength) {
 		super(JobCategories.DETECT_INTERVALS);
 
 		this.inputFile = inputFile;
-		this.silenceLevel = silenceLevel;
-		this.silenceTimeThreshold = silenceTimeThreshold;
+		this.noiseTolerance = silenceLevel;
+		this.minSegmentLength = minSegmentLength;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 				"-i", inputFile.toString(),
 				"-vn",
 				"-af",
-				"silencedetect=noise=" + silenceLevel + "dB:d=" + silenceTimeThreshold,
+				"silencedetect=noise=" + noiseTolerance + "dB:d=" + minSegmentLength,
 				"-f", "null",
 				"-"
 		);

@@ -31,6 +31,9 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.MAX_VOLUME})
 		Double maxVolume;
 
+		@Parameter(names = {BuiltinCliParameters.NOISE_TOLERANCE})
+		Integer noiseTolerance;
+
 		@Parameter(names = {BuiltinCliParameters.AUDIO_ONLY})
 		Boolean audioOnly;
 
@@ -61,6 +64,7 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		ProjectConfig config = ProjectConfig.builder(command.inputFile, command.outputFile)
 				.minSegmentLength(command.minSegmentLength)
 				.maxVolume(command.maxVolume)
+				.noiseTolerance(command.noiseTolerance)
 				.audioOnly(command.audioOnly)
 				.maxThreads(command.maxThreads)
 				.threadsPerFfmpegInstance(command.threadsPerFfmpegInstance)

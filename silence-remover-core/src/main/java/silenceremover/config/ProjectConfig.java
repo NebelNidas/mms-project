@@ -8,6 +8,7 @@ public class ProjectConfig {
 		protected final Path outputFile;
 		protected Double minSegmentLength;
 		protected Double maxVolume;
+		protected Integer noiseTolerance;
 		protected Boolean audioOnly;
 		protected Integer maxThreads = Runtime.getRuntime().availableProcessors() / 2;
 		protected Integer threadsPerFfmpegInstance = maxThreads;
@@ -25,6 +26,11 @@ public class ProjectConfig {
 
 		public Builder maxVolume(Double maxVolume) {
 			this.maxVolume = maxVolume;
+			return this;
+		}
+
+		public Builder noiseTolerance(Integer noiseTolerance) {
+			this.noiseTolerance = noiseTolerance;
 			return this;
 		}
 
@@ -49,8 +55,9 @@ public class ProjectConfig {
 		}
 
 		public ProjectConfig build() {
-			if (minSegmentLength == null) minSegmentLength = 0.2;
+			if (minSegmentLength == null) minSegmentLength = 0.4;
 			if (maxVolume == null) maxVolume = 0.3;
+			if (noiseTolerance == null) noiseTolerance = -50;
 			if (audioOnly == null) audioOnly = false;
 			if (maxThreads == null) maxThreads = Runtime.getRuntime().availableProcessors() / 2;
 			if (threadsPerFfmpegInstance == null) threadsPerFfmpegInstance = maxThreads / 2;
@@ -61,6 +68,7 @@ public class ProjectConfig {
 					outputFile,
 					minSegmentLength,
 					maxVolume,
+					noiseTolerance,
 					audioOnly,
 					maxThreads,
 					threadsPerFfmpegInstance,
@@ -84,6 +92,10 @@ public class ProjectConfig {
 	 * allowed to have in order to still be considered silent.
 	 */
 	public final double maxVolume;
+	/**
+	 * Noise tolerance for detecting silent parts, in decibels.
+	 */
+	public final int noiseTolerance;
 	public final boolean audioOnly;
 	public final int maxThreads;
 	public final int threadsPerFfmpegInstance;
@@ -94,6 +106,7 @@ public class ProjectConfig {
 			Path outputFile,
 			double minSegmentLength,
 			double maxVolume,
+			int noiseTolerance,
 			boolean audioOnly,
 			int maxThreads,
 			int threadsPerFfmpegInstance,
@@ -102,6 +115,7 @@ public class ProjectConfig {
 		this.outputFile = outputFile;
 		this.minSegmentLength = minSegmentLength;
 		this.maxVolume = maxVolume;
+		this.noiseTolerance = noiseTolerance;
 		this.audioOnly = audioOnly;
 		this.maxThreads = maxThreads;
 		this.threadsPerFfmpegInstance = threadsPerFfmpegInstance;
