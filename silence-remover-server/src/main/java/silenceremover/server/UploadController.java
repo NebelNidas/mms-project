@@ -111,6 +111,8 @@ public class UploadController {
 					emitter.complete();
 					progressService.removeJob(identifier);
 					resultService.add(identifier, f.getAbsolutePath());
+				} catch (IllegalStateException e) {
+					lastSentProgress.set(1000);
 				} catch (IOException e) {
 					emitter.completeWithError(e);
 				}
