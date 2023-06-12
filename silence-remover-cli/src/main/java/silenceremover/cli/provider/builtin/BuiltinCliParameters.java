@@ -12,6 +12,6 @@ public class BuiltinCliParameters {
 	public static final String AUDIBLE_SEGMENT_PADDING = "--audible-segment-padding";
 	public static final String AUDIO_ONLY = "--audio-only";
 	public static final String MAX_THREADS = "--max-threads";
-	public static final String THREADS_PER_FFMPEG_INSTANCE = "--threads-per-ffmpeg-instance";
+	public static final String THREADS_PER_SEGMENT = "--threads-per-segment";
 	public static final String SEGMENTS_PER_FFMPEG_INSTANCE = "--segments-per-ffmpeg-instance";
 }

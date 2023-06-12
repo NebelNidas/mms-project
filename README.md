@@ -18,7 +18,7 @@ Additional parameters:
 --max-negative-volume-deviation:	Max negative deviation from the file's peak volume in decibels after which the segment is considered silent. Default: 30
 --audible-segment-padding:			Padding in seconds that's added around audible segments, so the audio doesn't feel as cut off. Default: 0.25
 --audio-only						Whether or not to skip video processing and only output an audio file. Speeds up processing by a lot. Default: false
---max-threads:						Max threads Silence Remover is allowed to use. Default: Half of your system threads
---threads-per-ffmpeg-instance		A higher value will decrease the amount of parallelism, which may or may not increase processing speed depending on the input video. Default: 4
---segments-per-ffmpeg-instance		If you have lots of silent parts in a video, increasing this value will speed up processing due to increased parallelism. Can have the opposite effect when few silent parts are present. Default: 4
+--max-threads:						Rough amount of max threads Silence Remover is allowed to use. This isn't clear-cut since FFmpeg tends to use more threads than allowed. Default: Half of your system threads
+--threads-per-segment				A higher value will decrease the amount of parallel FFmpeg instances, which may or may not increase processing speed depending on the input video. Default: 2
+--segments-per-ffmpeg-instance		If you have lots of silent parts in a video, increasing this value will speed up processing due to less FFmpeg-instance-creation overhead. Can have the opposite effect when few silent parts are present. Default: 4
 ```

@@ -14,12 +14,10 @@ import silenceremover.config.ProjectConfig;
 public class SplitThread implements Callable<List<Path>> {
 	private final ProjectConfig config;
 	private final List<Interval> intervals;
-	private final int threads;
 	private final Function<Interval, Path> tempFileGenerator;
 
-	public SplitThread(ProjectConfig config, List<Interval> intervals, int threads, Function<Interval, Path> tempFileGenerator) {
+	public SplitThread(ProjectConfig config, List<Interval> intervals, Function<Interval, Path> tempFileGenerator) {
 		this.config = config;
-		this.threads = threads;
 		this.tempFileGenerator = tempFileGenerator;
 		this.intervals = intervals;
 	}
@@ -41,6 +39,9 @@ public class SplitThread implements Callable<List<Path>> {
 
 		try {
 			process = processBuilder.start();
+
+			// Kill FFmpeg instance when user exits application
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> Util.killProcess(process)));
 
 			BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			String line;
@@ -66,6 +67,10 @@ public class SplitThread implements Callable<List<Path>> {
 		commandParts.add(config.ffmpegExecutable.toAbsolutePath().toString());
 
 		for (Interval interval : intervals) {
+			// "threads" is needed both before each input file and after:
+			// https://github.com/cisco/openh264/issues/1889#issuecomment-91018851
+			commandParts.add("-threads");
+			commandParts.add(Integer.toString(config.threadsPerSegment));
 			commandParts.add("-i");
 			commandParts.add(config.inputFile.toString());
 		}
@@ -87,7 +92,7 @@ public class SplitThread implements Callable<List<Path>> {
 			commandParts.add("-safe");
 			commandParts.add("0");
 			commandParts.add("-threads");
-			commandParts.add(Integer.toString(threads));
+			commandParts.add(Integer.toString(config.threadsPerSegment));
 			commandParts.add("-ignore_unknown");
 			commandParts.add("-y");
 

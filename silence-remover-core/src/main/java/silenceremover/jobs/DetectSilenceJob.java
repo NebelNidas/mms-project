@@ -13,6 +13,7 @@ import job4j.Job;
 
 import silenceremover.Interval;
 import silenceremover.SilenceRemover;
+import silenceremover.Util;
 import silenceremover.config.ProjectConfig;
 
 public class DetectSilenceJob extends Job<List<Interval>> {
@@ -30,15 +31,20 @@ public class DetectSilenceJob extends Job<List<Interval>> {
 		// http://underpop.online.fr/f/ffmpeg/help/silencedetect.htm.gz
 		ProcessBuilder processBuilder = new ProcessBuilder(
 				"ffmpeg",
+				"-threads", Integer.toString(config.maxThreads),
 				"-i", config.inputFile.toString(),
 				"-vn",
 				"-af",
 				"silencedetect=noise=-" + (config.maxNegativeVolumeDeviation - 1) + "dB:d=" + config.minSegmentLength,
+				"-threads", Integer.toString(config.maxThreads),
 				"-f", "null",
 				"-"
 		);
 
 		Process process = processBuilder.start();
+
+		// Kill FFmpeg instance when user exits application
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> Util.killProcess(process)));
 
 		// FFmpeg writes to stderr instead of stdout for whatever reason...
 		BufferedReader stdErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));

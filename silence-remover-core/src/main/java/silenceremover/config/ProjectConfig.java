@@ -12,7 +12,7 @@ public class ProjectConfig {
 		protected Double audibleSegmentPadding;
 		protected Boolean audioOnly;
 		protected Integer maxThreads = Runtime.getRuntime().availableProcessors() / 2;
-		protected Integer threadsPerFfmpegInstance = maxThreads;
+		protected Integer threadsPerSegment = maxThreads;
 		protected Integer segmentsPerFfmpegInstance;
 
 		private Builder(Path inputFile, Path outputFile, Path ffmpegExecutable) {
@@ -46,8 +46,8 @@ public class ProjectConfig {
 			return this;
 		}
 
-		public Builder threadsPerFfmpegInstance(Integer threadsPerFfmpegInstance) {
-			this.threadsPerFfmpegInstance = threadsPerFfmpegInstance;
+		public Builder threadsPerSegment(Integer threadsPerSegment) {
+			this.threadsPerSegment = threadsPerSegment;
 			return this;
 		}
 
@@ -62,7 +62,7 @@ public class ProjectConfig {
 			if (audibleSegmentPadding == null) audibleSegmentPadding = 0.25;
 			if (audioOnly == null) audioOnly = false;
 			if (maxThreads == null) maxThreads = Runtime.getRuntime().availableProcessors() / 2;
-			if (threadsPerFfmpegInstance == null) threadsPerFfmpegInstance = maxThreads / 2;
+			if (threadsPerSegment == null) threadsPerSegment = 2;
 			if (segmentsPerFfmpegInstance == null) segmentsPerFfmpegInstance = 4;
 
 			return new ProjectConfig(
@@ -74,7 +74,7 @@ public class ProjectConfig {
 					audibleSegmentPadding,
 					audioOnly,
 					maxThreads,
-					threadsPerFfmpegInstance,
+					threadsPerSegment,
 					segmentsPerFfmpegInstance);
 		}
 	}
@@ -103,7 +103,7 @@ public class ProjectConfig {
 	public final int maxNegativeVolumeDeviation;
 	public final boolean audioOnly;
 	public final int maxThreads;
-	public final int threadsPerFfmpegInstance;
+	public final int threadsPerSegment;
 	public final int segmentsPerFfmpegInstance;
 
 	private ProjectConfig(
@@ -115,7 +115,7 @@ public class ProjectConfig {
 			double audibleSegmentPadding,
 			boolean audioOnly,
 			int maxThreads,
-			int threadsPerFfmpegInstance,
+			int threadsPerSegment,
 			int segmentsPerFfmpegInstance) {
 		this.inputFile = inputFile;
 		this.outputFile = outputFile;
@@ -125,7 +125,7 @@ public class ProjectConfig {
 		this.audibleSegmentPadding = audibleSegmentPadding;
 		this.audioOnly = audioOnly;
 		this.maxThreads = maxThreads;
-		this.threadsPerFfmpegInstance = threadsPerFfmpegInstance;
+		this.threadsPerSegment = threadsPerSegment;
 		this.segmentsPerFfmpegInstance = segmentsPerFfmpegInstance;
 	}
 }

@@ -46,9 +46,8 @@ public class ProcessCommandProvider implements CliCommandProvider {
 		@Parameter(names = {BuiltinCliParameters.MAX_THREADS})
 		Integer maxThreads;
 
-		@Parameter(names = {BuiltinCliParameters.THREADS_PER_FFMPEG_INSTANCE})
-		Integer threadsPerFfmpegInstance;
-
+		@Parameter(names = {BuiltinCliParameters.THREADS_PER_SEGMENT})
+		Integer threadsPerSegment;
 		@Parameter(names = {BuiltinCliParameters.SEGMENTS_PER_FFMPEG_INSTANCE})
 		Integer segmentsPerFfmpegInstance;
 	}
@@ -73,8 +72,8 @@ public class ProcessCommandProvider implements CliCommandProvider {
 				.audibleSegmentPadding(command.audibleSegmentPadding)
 				.audioOnly(command.audioOnly)
 				.maxThreads(command.maxThreads)
-				.threadsPerFfmpegInstance(command.threadsPerFfmpegInstance)
 				.segmentsPerFfmpegInstance(command.segmentsPerFfmpegInstance)
+				.threadsPerSegment(command.threadsPerSegment)
 				.build();
 		SilenceRemover silenceRemover = new SilenceRemover(config);
 		AtomicInteger lastPrintedPercentage = new AtomicInteger(-1);

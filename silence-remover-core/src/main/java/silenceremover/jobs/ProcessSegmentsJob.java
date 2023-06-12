@@ -23,6 +23,7 @@ import job4j.JobState;
 import silenceremover.Interval;
 import silenceremover.SilenceRemover;
 import silenceremover.SplitThread;
+import silenceremover.Util;
 import silenceremover.config.ProjectConfig;
 
 public class ProcessSegmentsJob extends Job<Path> {
@@ -39,7 +40,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 		this.config = config;
 		this.tempDir = config.outputFile.toAbsolutePath().getParent().resolve("silence-remover-temp");
-		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / config.threadsPerFfmpegInstance));
+		this.threadPool = Executors.newFixedThreadPool(Math.max(1, config.maxThreads / config.threadsPerSegment));
 		this.intervals = intervals;
 	}
 
@@ -67,7 +68,7 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 				for (List<Interval> group : audibleIntervalGroups) {
 					futures.add(threadPool.submit(new SplitThread(config, group,
-							config.threadsPerFfmpegInstance, ProcessSegmentsJob.this::getTempFileForInterval)::call));
+							ProcessSegmentsJob.this::getTempFileForInterval)::call));
 				}
 
 				for (Future<List<Path>> future : futures) {
@@ -122,6 +123,12 @@ public class ProcessSegmentsJob extends Job<Path> {
 	private void mergeSegments(DoubleConsumer progressReceiver) throws IOException {
 		List<String> command = new ArrayList<>();
 		command.add(config.ffmpegExecutable.toAbsolutePath().toString());
+
+		// "threads" is needed both before the input file and after:
+		// https://github.com/cisco/openh264/issues/1889#issuecomment-91018851
+		command.add("-threads");
+		command.add(Integer.toString(config.maxThreads));
+
 		command.add("-f"); // Needed for concat option?
 		command.add("concat");
 		command.add("-safe"); // Helps with relative paths
@@ -152,6 +159,9 @@ public class ProcessSegmentsJob extends Job<Path> {
 
 		Process process = processBuilder.start();
 		BufferedReader stdOut = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+		// Kill FFmpeg instance when user exits application
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> Util.killProcess(process)));
 
 		int fileIndex = 1;
 		String line;
