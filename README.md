@@ -25,7 +25,7 @@ Additional parameters:
 
 ## Known issues
 - Multithreading performs rather poorly at the moment. Using input videos with a length over 5 minutes isn't recommended for that reason yet. We're continuing to look into potential solutions though (filters seem like a good candidate).
-- Some output videos appear to have the same length as their input counterparts, even after processing. This seems to be an issue with FFmpeg's concatenate command though, as the actual video length is shorter, it's just the metadata that's wrong sometimes.
+- Some output videos appear to have the same or an even greater length as their input counterparts after processing. This seems to be an issue with FFmpeg's concatenate command though, as the actual video length is shorter, it's just the metadata that's wrong sometimes.
 
 ## Building
 The project can be built via `./gradlew :<subproject>:build`, for example `./gradlew :silence-remover-cli:build`. The built JAR files are in the respective module's `build/libs` folder. The `*-all` JARs have all dependencies bundled in.
